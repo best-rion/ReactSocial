@@ -53,7 +53,6 @@ public class UserServiceImpl implements UserService {
                     new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password())
             );
         } catch (AuthenticationException e) {
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
