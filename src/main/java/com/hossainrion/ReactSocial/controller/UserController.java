@@ -1,7 +1,6 @@
 package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.JwtUtil;
-import com.hossainrion.ReactSocial.dto.LoginDto;
 import com.hossainrion.ReactSocial.dto.UserResponseDto;
 import com.hossainrion.ReactSocial.dto.UserSaveDto;
 import com.hossainrion.ReactSocial.entity.User;
@@ -20,14 +19,14 @@ public class UserController {
     public UserController(UserService userService) {this.userService = userService;}
 
     @GetMapping
-    public ResponseEntity<UserResponseDto> me(HttpServletRequest request) {
+    public ResponseEntity<UserResponseDto> getUser(HttpServletRequest request) {
         String email = JwtUtil.getEmailFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
         User user = userService.getUserByEmail(email);
         return ResponseEntity.ok(UserResponseDto.fromUser(user));
     }
 
     @PostMapping
-    public ResponseEntity<Boolean> addUser(@RequestBody UserSaveDto userSaveDto) {
+    public ResponseEntity<Boolean> saveUser(@RequestBody UserSaveDto userSaveDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(userSaveDto));
     }
 
