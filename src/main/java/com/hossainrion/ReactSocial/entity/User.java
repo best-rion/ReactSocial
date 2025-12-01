@@ -64,7 +64,6 @@ public class User implements UserDetails
 
     @Override
     public List<GrantedAuthority> getAuthorities() {
-        // TODO Auto-generated method stub
 
         List<GrantedAuthority> auth = new ArrayList<>();
         auth.add(new SimpleGrantedAuthority("USER"));
