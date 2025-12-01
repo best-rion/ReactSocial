@@ -19,7 +19,14 @@ public class UserController {
     private final UserService userService;
     public UserController(UserService userService) {this.userService = userService;}
 
-    @PostMapping("/save")
+    @GetMapping
+    public ResponseEntity<UserResponseDto> me(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
+        User user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(UserResponseDto.fromUser(user));
+    }
+
+    @PostMapping
     public ResponseEntity<Boolean> addUser(@RequestBody UserSaveDto userSaveDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(userSaveDto));
     }
@@ -29,15 +36,5 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers().stream().map(User::getUsername).toList());
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
-        return userService.handleAuthentication(loginDto);
-    }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> me(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
-        User user = userService.getUserByEmail(email);
-        return ResponseEntity.ok(UserResponseDto.fromUser(user));
-    }
 }
