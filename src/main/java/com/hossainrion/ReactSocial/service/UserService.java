@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
+    User getUserByEmail(String email);
     List<User> getAllUsers();
     Boolean addUser(UserSaveDto userSaveDto);
     ResponseEntity<?> handleAuthentication(LoginDto loginDto);

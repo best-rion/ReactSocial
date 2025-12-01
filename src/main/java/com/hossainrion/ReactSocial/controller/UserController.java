@@ -1,10 +1,11 @@
 package com.hossainrion.ReactSocial.controller;
 
-import com.hossainrion.ReactSocial.Utils;
+import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.dto.LoginDto;
 import com.hossainrion.ReactSocial.dto.UserSaveDto;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,6 @@ public class UserController {
 
     @PostMapping("/save")
     public ResponseEntity<Boolean> addUser(@RequestBody UserSaveDto userSaveDto) {
-        Utils.testDelay();
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(userSaveDto));
     }
 
@@ -32,5 +32,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         return userService.handleAuthentication(loginDto);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<String> me(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
+        return ResponseEntity.ok(userService.getUserByEmail(email).getFullName());
     }
 }

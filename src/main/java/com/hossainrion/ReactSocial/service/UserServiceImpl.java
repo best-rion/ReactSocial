@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.Utils;
+import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.dto.JwtResponse;
 import com.hossainrion.ReactSocial.dto.LoginDto;
 import com.hossainrion.ReactSocial.dto.UserSaveDto;
@@ -57,7 +57,12 @@ public class UserServiceImpl implements UserService {
         }
 
         final UserDetails user = userDetailsService.loadUserByUsername(loginDto.email());
-        final String jwt = Utils.generateToken(user);
+        final String jwt = JwtUtil.generateToken(user);
         return ResponseEntity.ok(new JwtResponse(jwt));
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
