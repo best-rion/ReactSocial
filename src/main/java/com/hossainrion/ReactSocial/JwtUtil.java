@@ -3,6 +3,7 @@ package com.hossainrion.ReactSocial;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +24,16 @@ public  class JwtUtil {
                 .compact();
     }
 
-    public static String getEmailFromToken(String token) {
+    private static String getEmailFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.getSubject();
+    }
+
+    public static String getEmailFromRequest(HttpServletRequest request) {
+        return getEmailFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
     }
 }

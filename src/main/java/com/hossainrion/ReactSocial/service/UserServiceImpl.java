@@ -4,8 +4,10 @@ import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.dto.JwtResponse;
 import com.hossainrion.ReactSocial.dto.LoginDto;
 import com.hossainrion.ReactSocial.dto.UserSaveDto;
+import com.hossainrion.ReactSocial.dto.UserUpdateDto;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+
     public UserServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
@@ -47,6 +50,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Boolean updateUser(UserUpdateDto userUpdateDto, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        user.setFullName(userUpdateDto.fullName());
+        user.setBio(userUpdateDto.bio());
+        // TODO: Create a method to save picture
+        userRepository.save(user);
+        return true;
+    }
+
+    @Override
     public ResponseEntity<?> handleAuthentication(LoginDto loginDto) {
         try {
             authenticationManager.authenticate(
@@ -62,7 +76,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByEmail(String email) {
+    public User getUser(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
         return userRepository.findByEmail(email);
     }
 }
