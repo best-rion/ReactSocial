@@ -21,8 +21,7 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(HttpServletRequest request) {
-        User user = userService.getUser(request);
-        return ResponseEntity.ok(UserResponseDto.fromUser(user));
+        return ResponseEntity.ok(userService.getUser(request));
     }
 
     @PostMapping

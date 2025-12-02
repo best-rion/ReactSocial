@@ -1,10 +1,8 @@
 package com.hossainrion.ReactSocial.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
-import com.hossainrion.ReactSocial.dto.JwtResponse;
-import com.hossainrion.ReactSocial.dto.LoginDto;
-import com.hossainrion.ReactSocial.dto.UserSaveDto;
-import com.hossainrion.ReactSocial.dto.UserUpdateDto;
+import com.hossainrion.ReactSocial.Util;
+import com.hossainrion.ReactSocial.dto.*;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,12 +48,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Boolean updateUser(UserUpdateDto userUpdateDto, HttpServletRequest request) {
         String email = JwtUtil.getEmailFromRequest(request);
         User user = userRepository.findByEmail(email);
         user.setFullName(userUpdateDto.fullName());
         user.setBio(userUpdateDto.bio());
-        // TODO: Create a method to save picture
+
+        try {
+            if (user.getPicture() != null && Util.pictureExists(user.getPicture())) {
+                Util.deleteFile(user.getPicture());
+            }
+            if (!userUpdateDto.pictureBase64().isEmpty()) {
+                String fileName = Util.savePicture(userUpdateDto.pictureBase64());
+                if (fileName != null) {
+                    user.setPicture(fileName);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         userRepository.save(user);
         return true;
     }
@@ -76,8 +88,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(HttpServletRequest request) {
+    public UserResponseDto getUser(HttpServletRequest request) {
         String email = JwtUtil.getEmailFromRequest(request);
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+        String pictureBase64 = "";
+        if (user.getPicture() != null && Util.pictureExists(user.getPicture())) {
+            try {
+                pictureBase64 = Util.imageUrlToBase64(user.getPicture());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return new UserResponseDto(
+                user.getFullName(),
+                user.getEmail(),
+                user.getBio(),
+                pictureBase64
+        );
     }
 }
