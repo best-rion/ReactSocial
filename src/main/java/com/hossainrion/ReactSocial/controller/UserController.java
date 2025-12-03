@@ -48,6 +48,7 @@ public class UserController {
         users.remove(thisUser);
         users.removeAll(thisUser.getSentRequests());
         users.removeAll(userService.getReceivedRequestsById(thisUser.getId())); // TODO: need to move this logic to UserRepository
+        users.removeAll(thisUser.getFriends());
         users.sort((a,b)->Long.compare(b.getId(),a.getId()));
         return ResponseEntity.ok(users.stream().map(UserResponseDto::fromUser).toList());
     }
@@ -65,5 +66,15 @@ public class UserController {
     @GetMapping("received-requests")
     public ResponseEntity<List<UserResponseDto>> getReceivedRequests(HttpServletRequest request) {
         return ResponseEntity.ok(userService.getReceivedRequests(request));
+    }
+
+    @PutMapping("accept-request")
+    public ResponseEntity<Boolean> acceptRequest(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+        return ResponseEntity.ok(userService.acceptFriendRequest(userIdDto.id(), request));
+    }
+
+    @GetMapping("friends")
+    public ResponseEntity<List<UserResponseDto>> getFriends(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.getFriends(request));
     }
 }

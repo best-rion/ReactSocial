@@ -21,4 +21,6 @@ public interface UserService {
     List<UserResponseDto> getSentRequests(HttpServletRequest request);;
     List<User> getReceivedRequestsById(Long id);
     List<UserResponseDto> getReceivedRequests(HttpServletRequest request);
+    Boolean acceptFriendRequest(Long id, HttpServletRequest request);
+    List<UserResponseDto> getFriends(HttpServletRequest request);
 }

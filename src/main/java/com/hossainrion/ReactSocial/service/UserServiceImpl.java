@@ -133,4 +133,37 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return true;
     }
+
+    @Override
+    @Transactional
+    public Boolean acceptFriendRequest(Long id, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        User sender = userRepository.findById(id);
+        if (!sender.getSentRequests().contains(user)) return false;
+
+        Set<User> sentRequests = sender.getSentRequests();
+        sentRequests.remove(user);
+        sender.setSentRequests(sentRequests);
+
+        Set<User> friendsOfSender = sender.getFriends();
+        friendsOfSender.add(user);
+        sender.setFriends(friendsOfSender);
+
+        Set<User> friendsOfUser = user.getFriends();
+        friendsOfUser.add(sender);
+        user.setFriends(friendsOfUser);
+
+        userRepository.save(user);
+        userRepository.save(sender);
+
+        return true;
+    }
+
+    @Override
+    public List<UserResponseDto> getFriends(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        return new ArrayList<>(user.getFriends()).stream().map(UserResponseDto::fromUser).toList();
+    }
 }
