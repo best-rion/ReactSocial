@@ -25,7 +25,19 @@ public class User implements UserDetails
     private String fullName;
     private String bio;
     private String picture;
-    @ManyToMany private Set<User> sentRequests;
+    @ManyToMany
+    @JoinTable(
+            name = "friend_requests",                     // join table name
+            joinColumns = @JoinColumn(
+                    name = "sender_id",                // column in join table referencing THIS entity
+                    referencedColumnName = "id"
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "requested_user_id",                // column in join table referencing OTHER entity
+                    referencedColumnName = "id"
+            )
+    )
+    private Set<User> sentRequests;
     @ManyToMany private Set<User> friends;
 
     public String getPictureBase64() {
@@ -42,6 +54,7 @@ public class User implements UserDetails
 
     public User() {}
     public Long getId() {return id;}
+    public void setId(Long id) {this.id = id;}
     public String getUsername() {
         return getEmail();
     }

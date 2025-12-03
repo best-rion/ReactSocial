@@ -1,6 +1,7 @@
 package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.JwtUtil;
+import com.hossainrion.ReactSocial.dto.UserIdDto;
 import com.hossainrion.ReactSocial.dto.UserResponseDto;
 import com.hossainrion.ReactSocial.dto.UserSaveDto;
 import com.hossainrion.ReactSocial.dto.UserUpdateDto;
@@ -45,7 +46,24 @@ public class UserController {
         List<User> users = userService.getAllUsers();
         User thisUser = userService.getUserByEmail(JwtUtil.getEmailFromRequest(request));
         users.remove(thisUser);
+        users.removeAll(thisUser.getSentRequests());
+        users.removeAll(userService.getReceivedRequestsById(thisUser.getId())); // TODO: need to move this logic to UserRepository
         users.sort((a,b)->Long.compare(b.getId(),a.getId()));
         return ResponseEntity.ok(users.stream().map(UserResponseDto::fromUser).toList());
+    }
+
+    @PutMapping("add-friend")
+    public ResponseEntity<Boolean> addFriend(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+        return ResponseEntity.ok(userService.addFriend(userIdDto.id(), request));
+    }
+
+    @GetMapping("sent-requests")
+    public ResponseEntity<List<UserResponseDto>> getSentRequests(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.getSentRequests(request));
+    }
+
+    @GetMapping("received-requests")
+    public ResponseEntity<List<UserResponseDto>> getReceivedRequests(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.getReceivedRequests(request));
     }
 }

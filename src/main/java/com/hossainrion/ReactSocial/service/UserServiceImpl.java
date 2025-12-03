@@ -16,7 +16,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -97,5 +100,37 @@ public class UserServiceImpl implements UserService {
         String email = JwtUtil.getEmailFromRequest(request);
         User user = userRepository.findByEmail(email);
         return UserResponseDto.fromUser(user);
+    }
+
+    @Override
+    public List<UserResponseDto> getSentRequests(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        return new ArrayList<>(user.getSentRequests()).stream().map(UserResponseDto::fromUser).toList();
+    }
+
+    @Override
+    public List<UserResponseDto> getReceivedRequests(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        return getReceivedRequestsById(user.getId()).stream().map(UserResponseDto::fromUser).toList();
+    }
+
+    @Override
+    public List<User> getReceivedRequestsById(Long id) {
+        return userRepository.findReceivedRequestsById(id);
+    }
+
+    @Override
+    public Boolean addFriend(Long id, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        User newRequest = new User();
+        newRequest.setId(id);
+        Set<User> sentRequests = user.getSentRequests();
+        sentRequests.add(newRequest);
+        user.setSentRequests(sentRequests);
+        userRepository.save(user);
+        return true;
     }
 }

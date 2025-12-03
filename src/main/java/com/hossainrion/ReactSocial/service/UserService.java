@@ -17,4 +17,8 @@ public interface UserService {
     Boolean updateUser(UserUpdateDto userUpdateDto, HttpServletRequest request);
     ResponseEntity<?> handleAuthentication(LoginDto loginDto);
     User getUserByEmail(String email);
+    Boolean addFriend(Long id, HttpServletRequest request);
+    List<UserResponseDto> getSentRequests(HttpServletRequest request);;
+    List<User> getReceivedRequestsById(Long id);
+    List<UserResponseDto> getReceivedRequests(HttpServletRequest request);
 }
