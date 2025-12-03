@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -39,5 +40,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers().stream().map(User::getUsername).toList());
     }
 
-
+    @GetMapping("/friends-suggestion")
+    public ResponseEntity<List<UserResponseDto>> getFriendsSuggestion(HttpServletRequest request) {
+        List<User> users = userService.getAllUsers();
+        User thisUser = userService.getUserByEmail(JwtUtil.getEmailFromRequest(request));
+        users.remove(thisUser);
+        users.sort((a,b)->Long.compare(b.getId(),a.getId()));
+        return ResponseEntity.ok(users.stream().map(UserResponseDto::fromUser).toList());
+    }
 }

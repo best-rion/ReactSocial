@@ -88,22 +88,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
     public UserResponseDto getUser(HttpServletRequest request) {
         String email = JwtUtil.getEmailFromRequest(request);
         User user = userRepository.findByEmail(email);
-        String pictureBase64 = "";
-        if (user.getPicture() != null && Util.pictureExists(user.getPicture())) {
-            try {
-                pictureBase64 = Util.imageUrlToBase64(user.getPicture());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return new UserResponseDto(
-                user.getFullName(),
-                user.getEmail(),
-                user.getBio(),
-                pictureBase64
-        );
+        return UserResponseDto.fromUser(user);
     }
 }

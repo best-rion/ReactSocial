@@ -16,4 +16,5 @@ public interface UserService {
     Boolean addUser(UserSaveDto userSaveDto);
     Boolean updateUser(UserUpdateDto userUpdateDto, HttpServletRequest request);
     ResponseEntity<?> handleAuthentication(LoginDto loginDto);
+    User getUserByEmail(String email);
 }

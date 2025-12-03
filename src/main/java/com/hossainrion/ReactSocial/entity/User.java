@@ -1,5 +1,6 @@
 package com.hossainrion.ReactSocial.entity;
 
+import com.hossainrion.ReactSocial.Util;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name="user_table")
@@ -23,13 +25,26 @@ public class User implements UserDetails
     private String fullName;
     private String bio;
     private String picture;
+    @ManyToMany private Set<User> sentRequests;
+    @ManyToMany private Set<User> friends;
+
+    public String getPictureBase64() {
+        String pictureBase64 = "";
+        if (getPicture() != null && Util.pictureExists(getPicture())) {
+            try {
+                pictureBase64 = Util.imageUrlToBase64(getPicture());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return pictureBase64;
+    }
 
     public User() {}
-
+    public Long getId() {return id;}
     public String getUsername() {
         return getEmail();
     }
-
     public String getPassword() {
         return password;
     }
@@ -61,6 +76,10 @@ public class User implements UserDetails
     public void setPicture(String picture) {
         this.picture = picture;
     }
+    public Set<User> getSentRequests() {return sentRequests;}
+    public void setSentRequests(Set<User> sentRequests) {this.sentRequests = sentRequests;}
+    public Set<User> getFriends() {return friends;}
+    public void setFriends(Set<User> friends) {this.friends = friends;}
 
     @Override
     public List<GrantedAuthority> getAuthorities() {
