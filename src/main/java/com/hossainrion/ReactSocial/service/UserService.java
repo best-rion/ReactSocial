@@ -23,4 +23,8 @@ public interface UserService {
     List<UserResponseDto> getReceivedRequests(HttpServletRequest request);
     Boolean acceptFriendRequest(Long id, HttpServletRequest request);
     List<UserResponseDto> getFriends(HttpServletRequest request);
+    Boolean unfriend(Long id, HttpServletRequest request);
+    Boolean cancelFriendRequest(Long id, HttpServletRequest request);
+    Boolean cancelReceivedRequest(Long id, HttpServletRequest request);
+
 }

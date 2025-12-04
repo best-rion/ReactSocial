@@ -77,4 +77,19 @@ public class UserController {
     public ResponseEntity<List<UserResponseDto>> getFriends(HttpServletRequest request) {
         return ResponseEntity.ok(userService.getFriends(request));
     }
+
+    @PutMapping("unfriend")
+    public ResponseEntity<Boolean> unfriend(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+        return ResponseEntity.ok(userService.unfriend(userIdDto.id(), request));
+    }
+
+    @PutMapping("cancel-request")
+    public ResponseEntity<Boolean> cancelRequest(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+        return ResponseEntity.ok(userService.cancelFriendRequest(userIdDto.id(), request));
+    }
+
+    @PutMapping("cancel-received-request")
+    public ResponseEntity<Boolean> cancelReceivedRequest(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+        return ResponseEntity.ok(userService.cancelReceivedRequest(userIdDto.id(), request));
+    }
 }

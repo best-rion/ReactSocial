@@ -166,4 +166,44 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(email);
         return new ArrayList<>(user.getFriends()).stream().map(UserResponseDto::fromUser).toList();
     }
+
+    @Override
+    @Transactional
+    public Boolean unfriend(Long id, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        User sender = userRepository.findById(id);
+        Set<User> friendsOfSender = sender.getFriends();
+        friendsOfSender.remove(user);
+        sender.setFriends(friendsOfSender);
+        Set<User> friendsOfUser = user.getFriends();
+        friendsOfUser.remove(sender);
+        user.setFriends(friendsOfUser);
+        userRepository.save(user);
+        return true;
+    }
+
+    @Override
+    public Boolean cancelFriendRequest(Long id, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        User sender = userRepository.findById(id);
+        Set<User> sentRequests = user.getSentRequests();
+        sentRequests.remove(sender);
+        user.setSentRequests(sentRequests);
+        userRepository.save(user);
+        return true;
+    }
+
+    @Override
+    public Boolean cancelReceivedRequest(Long id, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        User sender = userRepository.findById(id);
+        Set<User> sentRequests = sender.getSentRequests();
+        sentRequests.remove(user);
+        sender.setSentRequests(sentRequests);
+        userRepository.save(sender);
+        return true;
+    }
 }
