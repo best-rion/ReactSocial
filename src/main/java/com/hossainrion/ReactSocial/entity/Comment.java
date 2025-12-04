@@ -17,5 +17,5 @@ public class Comment {
     private User author;
     @Column(columnDefinition="TEXT")
     private String content;
-    private Date date;
+    private Date createdAt;
 }
