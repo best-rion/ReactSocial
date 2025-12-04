@@ -1,6 +1,8 @@
 package com.hossainrion.ReactSocial.controller;
 
+import com.hossainrion.ReactSocial.dto.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
+import com.hossainrion.ReactSocial.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,14 +10,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/post")
 public class PostController {
+    private final PostService postService;
+    PostController(PostService postService) {this.postService = postService;}
+
     @PostMapping
     public ResponseEntity<Boolean> createPost(@RequestBody PostSaveDto postSaveDto, HttpServletRequest request) {
-        System.out.println(postSaveDto.content());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(postService.addPost(postSaveDto.content(), request));
     }
 
     @PostMapping("/upload")
@@ -24,10 +29,15 @@ public class PostController {
         try {
             File dest = new File(uploadDir + file.getOriginalFilename());
             file.transferTo(dest);
-            return ResponseEntity.ok("File uploaded: " + dest.getName());
+            return ResponseEntity.ok(dest.getName());
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Upload failed");
         }
+    }
+
+    @GetMapping("/get-for-profile")
+    public ResponseEntity<List<PostResponseDto>> getPostForProfile(HttpServletRequest request) {
+        return ResponseEntity.ok(postService.getPosts(request));
     }
 }
