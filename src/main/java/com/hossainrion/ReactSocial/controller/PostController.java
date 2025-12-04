@@ -1,6 +1,7 @@
 package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.dto.PostResponseDto;
+import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
 import com.hossainrion.ReactSocial.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +38,7 @@ public class PostController {
     }
 
     @GetMapping("/get-for-profile")
-    public ResponseEntity<List<PostResponseDto>> getPostForProfile(HttpServletRequest request) {
+    public ResponseEntity<List<PostResponseForProfile>> getPostForProfile(HttpServletRequest request) {
         return ResponseEntity.ok(postService.getPosts(request));
     }
 }

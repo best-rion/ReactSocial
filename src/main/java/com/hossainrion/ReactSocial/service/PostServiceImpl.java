@@ -1,8 +1,7 @@
 package com.hossainrion.ReactSocial.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
-import com.hossainrion.ReactSocial.dto.PostAuthorDto;
-import com.hossainrion.ReactSocial.dto.PostResponseDto;
+import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.entity.Post;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.repository.PostRepository;
@@ -35,13 +34,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseDto> getPosts(HttpServletRequest httpServletRequest) {
+    public List<PostResponseForProfile> getPosts(HttpServletRequest httpServletRequest) {
         String email = JwtUtil.getEmailFromRequest(httpServletRequest);
         User user = userRepository.findByEmail(email);
         List<Post> posts = postRepository.findAllByAuthorId(user.getId());
-        return posts.stream().map(post -> {
-            PostAuthorDto authorDto = new PostAuthorDto(post.getAuthor().getId(), post.getAuthor().getFullName(), null);
-            return new PostResponseDto(post.getId(),post.getContent(), authorDto, post.getCreatedAt());
-        }).toList();
+        return posts.stream().map(post -> new PostResponseForProfile(post.getId(),post.getContent(), post.getCreatedAt())).toList();
     }
 }
