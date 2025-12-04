@@ -1,15 +1,15 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.dto.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
-import com.hossainrion.ReactSocial.entity.Post;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface PostService {
-    Boolean addPost(String content, HttpServletRequest request);
+    Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest request);
     List<PostResponseForProfile> getPosts(HttpServletRequest request);
+    ResponseEntity<String> saveMedia(MultipartFile file);
 }

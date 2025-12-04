@@ -21,20 +21,12 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Boolean> createPost(@RequestBody PostSaveDto postSaveDto, HttpServletRequest request) {
-        return ResponseEntity.ok(postService.addPost(postSaveDto.content(), request));
+        return ResponseEntity.ok(postService.addPost(postSaveDto, request));
     }
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        String uploadDir = "/home/hossain/Desktop/"; // create this folder in project root
-        try {
-            File dest = new File(uploadDir + file.getOriginalFilename());
-            file.transferTo(dest);
-            return ResponseEntity.ok(dest.getName());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Upload failed");
-        }
+        return postService.saveMedia(file);
     }
 
     @GetMapping("/get-for-profile")

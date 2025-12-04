@@ -25,9 +25,5 @@ public class Post {
             orphanRemoval = true
     )
     private List<Comment> comments;
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    public Media media;
+    private String mediaFileName;
 }
