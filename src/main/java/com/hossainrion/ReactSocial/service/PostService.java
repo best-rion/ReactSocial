@@ -1,5 +1,6 @@
 package com.hossainrion.ReactSocial.service;
 
+import com.hossainrion.ReactSocial.dto.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,4 +13,5 @@ public interface PostService {
     Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest request);
     List<PostResponseForProfile> getPosts(HttpServletRequest request);
     ResponseEntity<String> saveMedia(MultipartFile file);
+    List<PostResponseDto> getAllFromFriends(HttpServletRequest request);
 }

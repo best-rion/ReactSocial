@@ -1,6 +1,8 @@
 package com.hossainrion.ReactSocial.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
+import com.hossainrion.ReactSocial.dto.PostAuthorDto;
+import com.hossainrion.ReactSocial.dto.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
 import com.hossainrion.ReactSocial.entity.Post;
@@ -14,9 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -69,5 +70,16 @@ public class PostServiceImpl implements PostService {
         User user = userRepository.findByEmail(email);
         List<Post> posts = postRepository.findAllByAuthorId(user.getId());
         return posts.stream().map(post -> new PostResponseForProfile(post.getId(),post.getContent(), post.getCreatedAt(), post.getMediaFileName())).toList();
+    }
+
+    @Override
+    public List<PostResponseDto> getAllFromFriends(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        Set<User> friends = user.getFriends();
+        return friends.stream().flatMap(friend -> postRepository.findAllByAuthorId(friend.getId()).stream())
+                .map(post ->
+                    new PostResponseDto(post.getId(), post.getContent(), new PostAuthorDto(post.getAuthor().getId(), post.getAuthor().getFullName(), post.getAuthor().getPictureBase64()), post.getMediaFileName(), post.getCreatedAt())
+                ).toList();
     }
 }

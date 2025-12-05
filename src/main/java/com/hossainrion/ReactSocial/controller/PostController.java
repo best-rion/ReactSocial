@@ -33,4 +33,9 @@ public class PostController {
     public ResponseEntity<List<PostResponseForProfile>> getPostForProfile(HttpServletRequest request) {
         return ResponseEntity.ok(postService.getPosts(request));
     }
+
+    @GetMapping("/get-for-homepage")
+    public ResponseEntity<List<PostResponseDto>> getPostForHomepage(HttpServletRequest request) {
+        return ResponseEntity.ok(postService.getAllFromFriends(request));
+    }
 }
