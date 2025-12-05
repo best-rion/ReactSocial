@@ -1,5 +1,6 @@
 package com.hossainrion.ReactSocial.controller;
 
+import com.hossainrion.ReactSocial.dto.IdDto;
 import com.hossainrion.ReactSocial.dto.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
@@ -37,5 +38,10 @@ public class PostController {
     @GetMapping("/get-for-homepage")
     public ResponseEntity<List<PostResponseDto>> getPostForHomepage(HttpServletRequest request) {
         return ResponseEntity.ok(postService.getAllFromFriends(request));
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<Boolean> likePost(@RequestBody IdDto postIdDto, HttpServletRequest request) {
+        return ResponseEntity.ok(postService.like(postIdDto.id(), request));
     }
 }

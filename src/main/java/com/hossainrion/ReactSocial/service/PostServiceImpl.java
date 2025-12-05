@@ -6,10 +6,14 @@ import com.hossainrion.ReactSocial.dto.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.PostSaveDto;
 import com.hossainrion.ReactSocial.entity.Post;
+import com.hossainrion.ReactSocial.entity.PostLike;
 import com.hossainrion.ReactSocial.entity.User;
+import com.hossainrion.ReactSocial.entity.composityKey.PostLikeId;
+import com.hossainrion.ReactSocial.repository.PostLikeRepository;
 import com.hossainrion.ReactSocial.repository.PostRepository;
 import com.hossainrion.ReactSocial.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,15 +21,19 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    PostServiceImpl(PostRepository postRepository, UserRepository userRepository) {
+    private final PostLikeRepository postLikeRepository;
+    private final PostLikeIdRepository postLikeIdRepository;
+
+    PostServiceImpl(PostRepository postRepository, UserRepository userRepository, PostLikeRepository postLikeRepository, PostLikeIdRepository postLikeIdRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.postLikeRepository = postLikeRepository;
+        this.postLikeIdRepository = postLikeIdRepository;
     }
 
     @Override
@@ -69,7 +77,15 @@ public class PostServiceImpl implements PostService {
         String email = JwtUtil.getEmailFromRequest(httpServletRequest);
         User user = userRepository.findByEmail(email);
         List<Post> posts = postRepository.findAllByAuthorId(user.getId());
-        return posts.stream().map(post -> new PostResponseForProfile(post.getId(),post.getContent(), post.getCreatedAt(), post.getMediaFileName())).toList();
+        return posts.stream().map(post -> new PostResponseForProfile(
+                post.getId(),
+                post.getContent(),
+                post.getCreatedAt(),
+                post.getMediaFileName(),
+                post.getNumberOfLikes(),
+                post.getNumberOfComments(),
+                postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
+        )).toList();
     }
 
     @Override
@@ -79,7 +95,37 @@ public class PostServiceImpl implements PostService {
         Set<User> friends = user.getFriends();
         return friends.stream().flatMap(friend -> postRepository.findAllByAuthorId(friend.getId()).stream())
                 .map(post ->
-                    new PostResponseDto(post.getId(), post.getContent(), new PostAuthorDto(post.getAuthor().getId(), post.getAuthor().getFullName(), post.getAuthor().getPictureBase64()), post.getMediaFileName(), post.getCreatedAt())
+                    new PostResponseDto(
+                            post.getId(),
+                            post.getContent(),
+                            new PostAuthorDto(post.getAuthor().getId(), post.getAuthor().getFullName(), post.getAuthor().getPictureBase64()),
+                            post.getMediaFileName(),
+                            post.getCreatedAt(),
+                            post.getNumberOfLikes(),
+                            post.getNumberOfComments(),
+                            postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
+                    )
                 ).toList();
+    }
+
+    @Override
+    @Transactional
+    public Boolean like(Long postId, HttpServletRequest request) {
+        User user = userRepository.findByEmail(JwtUtil.getEmailFromRequest(request));
+        Post post = postRepository.findById(postId);
+
+        boolean likeStatus = postLikeRepository.existsByUserIdAndPostId(user.getId(), postId);
+        if (likeStatus) {
+            post.setNumberOfLikes(post.getNumberOfLikes() - 1);
+
+            postLikeRepository.deleteById(new PostLikeId(user.getId(), postId));
+        } else {
+            post.setNumberOfLikes(post.getNumberOfLikes() + 1);
+
+            postLikeRepository.save(new PostLike(user, post));
+
+            postRepository.save(post);
+        }
+        return ! likeStatus;
     }
 }

@@ -15,6 +15,8 @@ public class Comment {
     private long id;
     @ManyToOne
     private User author;
+    @ManyToOne
+    private Post post;
     @Column(columnDefinition="TEXT")
     private String content;
     private Date createdAt;

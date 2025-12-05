@@ -1,7 +1,7 @@
 package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.JwtUtil;
-import com.hossainrion.ReactSocial.dto.UserIdDto;
+import com.hossainrion.ReactSocial.dto.IdDto;
 import com.hossainrion.ReactSocial.dto.UserResponseDto;
 import com.hossainrion.ReactSocial.dto.UserSaveDto;
 import com.hossainrion.ReactSocial.dto.UserUpdateDto;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -54,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("add-friend")
-    public ResponseEntity<Boolean> addFriend(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> addFriend(@RequestBody IdDto userIdDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.addFriend(userIdDto.id(), request));
     }
 
@@ -69,7 +68,7 @@ public class UserController {
     }
 
     @PutMapping("accept-request")
-    public ResponseEntity<Boolean> acceptRequest(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> acceptRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.acceptFriendRequest(userIdDto.id(), request));
     }
 
@@ -79,17 +78,17 @@ public class UserController {
     }
 
     @PutMapping("unfriend")
-    public ResponseEntity<Boolean> unfriend(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> unfriend(@RequestBody IdDto userIdDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.unfriend(userIdDto.id(), request));
     }
 
     @PutMapping("cancel-request")
-    public ResponseEntity<Boolean> cancelRequest(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> cancelRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.cancelFriendRequest(userIdDto.id(), request));
     }
 
     @PutMapping("cancel-received-request")
-    public ResponseEntity<Boolean> cancelReceivedRequest(@RequestBody UserIdDto userIdDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> cancelReceivedRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.cancelReceivedRequest(userIdDto.id(), request));
     }
 }

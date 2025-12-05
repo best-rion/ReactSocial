@@ -20,10 +20,7 @@ public class Post {
     private Date createdAt;
     @Column(columnDefinition="TEXT")
     private String content;
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
-    )
-    private List<Comment> comments;
     private String mediaFileName;
+    private Long numberOfLikes = (long) 0;
+    private Long numberOfComments = (long) 0;
 }
