@@ -1,10 +1,8 @@
 package com.hossainrion.ReactSocial.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
-import com.hossainrion.ReactSocial.dto.PostAuthorDto;
-import com.hossainrion.ReactSocial.dto.PostResponseDto;
-import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
-import com.hossainrion.ReactSocial.dto.PostSaveDto;
+import com.hossainrion.ReactSocial.Util;
+import com.hossainrion.ReactSocial.dto.*;
 import com.hossainrion.ReactSocial.entity.Post;
 import com.hossainrion.ReactSocial.entity.PostLike;
 import com.hossainrion.ReactSocial.entity.User;
@@ -58,6 +56,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public ResponseEntity<String> updateMedia(MultipartFile file, Long postId) {
+        Post post = postRepository.findById(postId);
+        if (! post.getMediaFileName().isEmpty()) {
+            Util.deleteMedia(post.getMediaFileName());
+        }
+
+        return saveMedia(file);
+    }
+
+    @Override
     public Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest httpServletRequest) {
         String email = JwtUtil.getEmailFromRequest(httpServletRequest);
         User user = userRepository.findByEmail(email);
@@ -66,6 +74,23 @@ public class PostServiceImpl implements PostService {
         post.setMediaFileName(postSaveDto.fileName());
         post.setAuthor(user);
         post.setCreatedAt(new Date());
+        postRepository.save(post);
+        return true;
+    }
+
+    @Override
+    public Boolean updatePost(PostUpdateDto postUpdateDto, HttpServletRequest request) {
+        Post post = postRepository.findById(postUpdateDto.id());
+        post.setContent(postUpdateDto.content());
+        if (! postUpdateDto.fileName().isEmpty())
+        {
+            post.setMediaFileName(postUpdateDto.fileName());
+        } else {
+            if (postUpdateDto.removeMedia()) {
+                Util.deleteMedia(post.getMediaFileName());
+                post.setMediaFileName("");
+            }
+        }
         postRepository.save(post);
         return true;
     }

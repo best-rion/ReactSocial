@@ -41,6 +41,19 @@ public class Util {
         }
     }
 
+    public static void deleteMedia(String fileName) {
+        try {
+            if (fileName.endsWith(".png")) {
+                Files.delete(Paths.get(FILE_PATH + "photos/" + fileName));
+            } else if (fileName.endsWith(".mp4")) {
+                Files.delete(Paths.get(FILE_PATH + "videos/" + fileName));
+            }
+            System.out.println("File deleted");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private static void writeBase64ToFile(String base64Data, String fileName) throws IOException {
 
         // Decode Base64 string to byte array

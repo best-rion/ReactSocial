@@ -1,9 +1,6 @@
 package com.hossainrion.ReactSocial.controller;
 
-import com.hossainrion.ReactSocial.dto.IdDto;
-import com.hossainrion.ReactSocial.dto.PostResponseDto;
-import com.hossainrion.ReactSocial.dto.PostResponseForProfile;
-import com.hossainrion.ReactSocial.dto.PostSaveDto;
+import com.hossainrion.ReactSocial.dto.*;
 import com.hossainrion.ReactSocial.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +22,19 @@ public class PostController {
         return ResponseEntity.ok(postService.addPost(postSaveDto, request));
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<Boolean> updatePost(@RequestBody PostUpdateDto postUpdateDto, HttpServletRequest request) {
+        return ResponseEntity.ok(postService.updatePost(postUpdateDto, request));
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         return postService.saveMedia(file);
+    }
+
+    @PostMapping("/upload/update")
+    public ResponseEntity<String> uploadUpdateFile(@RequestParam("file") MultipartFile file, @RequestParam("postId") Long postId) {
+        return postService.updateMedia(file, postId);
     }
 
     @GetMapping("/get-for-profile")
