@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "post_table")
 public class Post {
@@ -21,6 +22,6 @@ public class Post {
     @Column(columnDefinition="TEXT")
     private String content;
     private String mediaFileName;
-    private Long numberOfLikes = (long) 0;
-    private Long numberOfComments = (long) 0;
+    private Long numberOfLikes;
+    private Long numberOfComments;
 }

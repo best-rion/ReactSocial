@@ -2,9 +2,9 @@ package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.dto.IdDto;
-import com.hossainrion.ReactSocial.dto.UserResponseDto;
-import com.hossainrion.ReactSocial.dto.UserSaveDto;
-import com.hossainrion.ReactSocial.dto.UserUpdateDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserSaveDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserUpdateDto;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,14 +42,7 @@ public class UserController {
 
     @GetMapping("/friends-suggestion")
     public ResponseEntity<List<UserResponseDto>> getFriendsSuggestion(HttpServletRequest request) {
-        List<User> users = userService.getAllUsers();
-        User thisUser = userService.getUserByEmail(JwtUtil.getEmailFromRequest(request));
-        users.remove(thisUser);
-        users.removeAll(thisUser.getSentRequests());
-        users.removeAll(userService.getReceivedRequestsById(thisUser.getId())); // TODO: need to move this logic to UserRepository
-        users.removeAll(thisUser.getFriends());
-        users.sort((a,b)->Long.compare(b.getId(),a.getId()));
-        return ResponseEntity.ok(users.stream().map(UserResponseDto::fromUser).toList());
+        return ResponseEntity.ok(userService.getFriendsSuggestion(request));
     }
 
     @PutMapping("add-friend")

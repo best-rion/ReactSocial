@@ -1,4 +1,4 @@
-package com.hossainrion.ReactSocial.dto;
+package com.hossainrion.ReactSocial.dto.forComment;
 
 import java.util.Date;
 

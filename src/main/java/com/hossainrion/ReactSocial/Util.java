@@ -13,44 +13,51 @@ import java.util.Base64;
 import java.util.UUID;
 
 public class Util {
-    private static final String FILE_PATH = "/home/hossain/Desktop/";
+    private static final String PROFILE_PICTURE_PATH = "/home/hossain/Desktop/profile_pictures/";
+    private static final String MEDIA_PHOTOS_PATH = "/home/hossain/Desktop/photos/";
+    private static final String MEDIA_VIDEOS_PATH = "/home/hossain/Desktop/videos/";
 
     /**
      * @param fileBase64 base64 file
      * @return The filename
      */
-    public static String savePicture(String fileBase64) {
+    public static String saveProfilePicture(String fileBase64) {
         if (StringUtils.isNotBlank(fileBase64)) {
-            String fileName = UUID.randomUUID().toString() + ".png";
+            String fileName = UUID.randomUUID() + ".png";
             try {
                 writeBase64ToFile(fileBase64, fileName);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
             return fileName;
         }
         return null;
     }
 
-    public static void deleteFile(String fileName) {
-        try {
-            Files.delete(Paths.get(FILE_PATH + fileName));
-            System.out.println("File deleted");
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static void deleteProfilePicture(String fileName) {
+        if (fileName != null && !fileName.isEmpty() && new File(PROFILE_PICTURE_PATH + fileName).exists()) {
+            try {
+                Files.delete(Paths.get(PROFILE_PICTURE_PATH + fileName));
+                System.out.println("File deleted");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public static void deleteMedia(String fileName) {
-        try {
-            if (fileName.endsWith(".png")) {
-                Files.delete(Paths.get(FILE_PATH + "photos/" + fileName));
-            } else if (fileName.endsWith(".mp4")) {
-                Files.delete(Paths.get(FILE_PATH + "videos/" + fileName));
+        if (fileName != null && !fileName.isEmpty()) {
+            try {
+                if (fileName.endsWith(".png") && new File(MEDIA_PHOTOS_PATH + fileName).exists()) {
+                    Files.delete(Paths.get(MEDIA_PHOTOS_PATH + fileName));
+                }
+                if (fileName.endsWith(".mp4") && new File(MEDIA_VIDEOS_PATH + fileName).exists()) {
+                    Files.delete(Paths.get(MEDIA_VIDEOS_PATH + fileName));
+                }
+                System.out.println("File deleted");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            System.out.println("File deleted");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -60,22 +67,21 @@ public class Util {
         byte[] fileBytes = Base64.getDecoder().decode(base64Data);
 
         // Write byte array to file
-        try (FileOutputStream fileOutputStream = new FileOutputStream(FILE_PATH+fileName)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(PROFILE_PICTURE_PATH+fileName)) {
             fileOutputStream.write(fileBytes);
         }
     }
 
     public static String imageUrlToBase64(String fileName) {
-        try (InputStream in = new URL("file://" + FILE_PATH + fileName).openStream()) {
-            byte[] bytes = in.readAllBytes();
-            return Base64.getEncoder().encodeToString(bytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to read image: " + e.getMessage(), e);
+        if (fileName != null && !fileName.isEmpty() && new File(PROFILE_PICTURE_PATH + fileName).exists()) {
+            try (InputStream in = new URL("file://" + PROFILE_PICTURE_PATH+ fileName).openStream()) {
+                byte[] bytes = in.readAllBytes();
+                return Base64.getEncoder().encodeToString(bytes);
+            } catch (Exception e) {
+                System.out.println("Failed to read image: " + e.getMessage());
+                return "";
+            }
         }
-    }
-
-    public static Boolean pictureExists(String fileName) {
-        File file = new File(FILE_PATH + fileName);
-        return file.exists();
+        return "";
     }
 }

@@ -24,7 +24,7 @@ public  class JwtUtil {
                 .compact();
     }
 
-    private static String getEmailFromToken(String token) {
+    private static String getusernameFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
@@ -33,7 +33,7 @@ public  class JwtUtil {
         return claims.getSubject();
     }
 
-    public static String getEmailFromRequest(HttpServletRequest request) {
-        return getEmailFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
+    public static String getusernameFromRequest(HttpServletRequest request) {
+        return getusernameFromToken(request.getHeader("Authorization").split("Bearer ")[1]);
     }
 }

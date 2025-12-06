@@ -8,7 +8,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +15,8 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name="user_table")
 public class User implements UserDetails
@@ -24,7 +25,7 @@ public class User implements UserDetails
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
     @Column(unique=true)
-    private String email;
+    private String username;
     private String password;
     private String fullName;
     private String bio;
@@ -46,19 +47,7 @@ public class User implements UserDetails
     private Set<User> friends;
 
     public String getPictureBase64() {
-        String pictureBase64 = "";
-        if (getPicture() != null && Util.pictureExists(getPicture())) {
-            try {
-                pictureBase64 = Util.imageUrlToBase64(getPicture());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return pictureBase64;
-    }
-
-    public String getUsername() {
-        return getEmail();
+        return Util.imageUrlToBase64(getPicture());
     }
 
     public void setPassword(String password) {

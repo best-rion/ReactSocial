@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.controller;
 
-import com.hossainrion.ReactSocial.dto.LoginDto;
+import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
 import com.hossainrion.ReactSocial.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

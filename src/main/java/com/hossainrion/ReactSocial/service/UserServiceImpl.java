@@ -3,6 +3,10 @@ package com.hossainrion.ReactSocial.service;
 import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.Util;
 import com.hossainrion.ReactSocial.dto.*;
+import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserSaveDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserUpdateDto;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,10 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,6 +37,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getCurrentUser(HttpServletRequest request) {
+        return userRepository.findByUsername(JwtUtil.getusernameFromRequest(request));
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -44,7 +51,7 @@ public class UserServiceImpl implements UserService {
     public Boolean addUser(UserSaveDto userSaveDto) {
         User user = new User();
         user.setFullName(userSaveDto.fullName());
-        user.setEmail(userSaveDto.email());
+        user.setUsername(userSaveDto.username());
         user.setPassword(userSaveDto.password());
         userRepository.save(user);
         return true;
@@ -53,24 +60,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean updateUser(UserUpdateDto userUpdateDto, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(request);
         user.setFullName(userUpdateDto.fullName());
         user.setBio(userUpdateDto.bio());
 
-        try {
-            if (user.getPicture() != null && Util.pictureExists(user.getPicture())) {
-                Util.deleteFile(user.getPicture());
+        Util.deleteProfilePicture(user.getPicture());
+        if (!userUpdateDto.pictureBase64().isEmpty()) {
+            String fileName = Util.saveProfilePicture(userUpdateDto.pictureBase64());
+            if (fileName != null) {
+                user.setPicture(fileName);
             }
-            if (!userUpdateDto.pictureBase64().isEmpty()) {
-                String fileName = Util.savePicture(userUpdateDto.pictureBase64());
-                if (fileName != null) {
-                    user.setPicture(fileName);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+
         userRepository.save(user);
         return true;
     }
@@ -79,20 +80,20 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> handleAuthentication(LoginDto loginDto) {
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password())
+                    new UsernamePasswordAuthenticationToken(loginDto.username(), loginDto.password())
             );
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        final UserDetails user = userDetailsService.loadUserByUsername(loginDto.email());
+        final UserDetails user = userDetailsService.loadUserByUsername(loginDto.username());
         final String jwt = JwtUtil.generateToken(user);
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
     @Override
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Override
@@ -102,22 +103,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUser(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
-        return UserResponseDto.fromUser(user);
+        return UserResponseDto.fromUser(getCurrentUser(request));
     }
 
     @Override
     public List<UserResponseDto> getSentRequests(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
-        return new ArrayList<>(user.getSentRequests()).stream().map(UserResponseDto::fromUser).toList();
+        User user = getCurrentUser(request);
+        return user.getSentRequests().stream().map(UserResponseDto::fromUser).toList();
     }
 
     @Override
     public List<UserResponseDto> getReceivedRequests(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(request);
         return getReceivedRequestsById(user.getId()).stream().map(UserResponseDto::fromUser).toList();
     }
 
@@ -128,12 +125,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean addFriend(Long id, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
-        User newRequest = new User();
-        newRequest.setId(id);
+        User user = getCurrentUser(request);
         Set<User> sentRequests = user.getSentRequests();
-        sentRequests.add(newRequest);
+        sentRequests.add(User.builder().id(id).build());
         user.setSentRequests(sentRequests);
         userRepository.save(user);
         return true;
@@ -142,8 +136,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean acceptFriendRequest(Long id, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(request);
         User sender = userRepository.findById(id);
         if (!sender.getSentRequests().contains(user)) return false;
 
@@ -167,16 +160,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getFriends(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
-        return new ArrayList<>(user.getFriends()).stream().map(UserResponseDto::fromUser).toList();
+        User user = getCurrentUser(request);
+        return user.getFriends().stream().map(UserResponseDto::fromUser).toList();
     }
 
     @Override
     @Transactional
     public Boolean unfriend(Long id, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(request);
         User sender = userRepository.findById(id);
         Set<User> friendsOfSender = sender.getFriends();
         friendsOfSender.remove(user);
@@ -185,13 +176,13 @@ public class UserServiceImpl implements UserService {
         friendsOfUser.remove(sender);
         user.setFriends(friendsOfUser);
         userRepository.save(user);
+        userRepository.save(sender);
         return true;
     }
 
     @Override
     public Boolean cancelFriendRequest(Long id, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(request);
         User sender = userRepository.findById(id);
         Set<User> sentRequests = user.getSentRequests();
         sentRequests.remove(sender);
@@ -202,13 +193,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean cancelReceivedRequest(Long id, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = getCurrentUser(request);
         User sender = userRepository.findById(id);
         Set<User> sentRequests = sender.getSentRequests();
         sentRequests.remove(user);
         sender.setSentRequests(sentRequests);
         userRepository.save(sender);
         return true;
+    }
+
+    @Override
+    public List<UserResponseDto> getFriendsSuggestion(HttpServletRequest request) {
+        List<User> users = getAllUsers();
+        User thisUser = getCurrentUser(request);
+        users.remove(thisUser);
+        users.removeAll(thisUser.getSentRequests());
+        users.removeAll(getReceivedRequestsById(thisUser.getId())); // TODO: need to move this logic to UserRepository
+        users.removeAll(thisUser.getFriends());
+        users.sort((a,b)->Long.compare(b.getId(),a.getId()));
+        return users.stream().map(UserResponseDto::fromUser).toList();
     }
 }

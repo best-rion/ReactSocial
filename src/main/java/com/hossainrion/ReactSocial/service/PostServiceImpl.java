@@ -1,15 +1,17 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.Util;
-import com.hossainrion.ReactSocial.dto.*;
+import com.hossainrion.ReactSocial.dto.forPost.PostResponseDto;
+import com.hossainrion.ReactSocial.dto.forPost.PostResponseForProfile;
+import com.hossainrion.ReactSocial.dto.forPost.PostSaveDto;
+import com.hossainrion.ReactSocial.dto.forPost.PostUpdateDto;
 import com.hossainrion.ReactSocial.entity.Post;
 import com.hossainrion.ReactSocial.entity.PostLike;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.entity.composityKey.PostLikeId;
+import com.hossainrion.ReactSocial.repository.CommentRepository;
 import com.hossainrion.ReactSocial.repository.PostLikeRepository;
 import com.hossainrion.ReactSocial.repository.PostRepository;
-import com.hossainrion.ReactSocial.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +25,15 @@ import java.util.*;
 @Service
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
 
-    PostServiceImpl(PostRepository postRepository, UserRepository userRepository, PostLikeRepository postLikeRepository) {
+    PostServiceImpl(PostRepository postRepository, UserService userService, PostLikeRepository postLikeRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.postLikeRepository = postLikeRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -58,22 +62,20 @@ public class PostServiceImpl implements PostService {
     @Override
     public ResponseEntity<String> updateMedia(MultipartFile file, Long postId) {
         Post post = postRepository.findById(postId);
-        if (! post.getMediaFileName().isEmpty()) {
-            Util.deleteMedia(post.getMediaFileName());
-        }
-
+        Util.deleteMedia(post.getMediaFileName());
         return saveMedia(file);
     }
 
     @Override
-    public Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest httpServletRequest) {
-        String email = JwtUtil.getEmailFromRequest(httpServletRequest);
-        User user = userRepository.findByEmail(email);
-        Post post = new Post();
-        post.setContent(postSaveDto.content());
-        post.setMediaFileName(postSaveDto.fileName());
-        post.setAuthor(user);
-        post.setCreatedAt(new Date());
+    public Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest request) {
+        User user = userService.getCurrentUser(request);
+        Post post = Post.builder().
+                content(postSaveDto.content()).
+                mediaFileName(postSaveDto.fileName()).
+                author(user).
+                numberOfLikes((long) 0).
+                numberOfComments((long) 0).
+                createdAt(new Date()).build();
         postRepository.save(post);
         return true;
     }
@@ -96,52 +98,62 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
+    public Boolean deletePostById(Long postId, HttpServletRequest request) {
+        User user = userService.getCurrentUser(request);
+        Post post = postRepository.findById(postId);
+        if (post.getAuthor().getId() != user.getId()) return false;
+        if (! post.getMediaFileName().isEmpty()) {
+            Util.deleteMedia(post.getMediaFileName());
+        }
+        postLikeRepository.deleteAllByPost(post);
+        commentRepository.deleteAllByPost(post);
+        postRepository.delete(post);
+        return true;
+    }
+
+    @Override
+    public Post getPostById(Long postId) {
+        return postRepository.findById(postId);
+    }
+
+    @Override
+    public void incrementCommentCount(Post post) {
+        post.setNumberOfComments(post.getNumberOfComments() + 1);
+        postRepository.save(post);
+    }
+
+    @Override
     public List<PostResponseForProfile> getPosts(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = userService.getCurrentUser(request);
         List<Post> posts = postRepository.findAllByAuthorId(user.getId());
-        return posts.stream().map(post -> new PostResponseForProfile(
-                post.getId(),
-                post.getContent(),
-                post.getCreatedAt(),
-                post.getMediaFileName(),
-                post.getNumberOfLikes(),
-                post.getNumberOfComments(),
-                postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
-        )).toList();
+        return posts.stream().map(post ->
+                PostResponseForProfile.fromPost(
+                        post,
+                        postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
+                )
+        ).toList();
     }
 
     @Override
     public List<PostResponseForProfile> getPostsByAuthorId(Long authorId, HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = userService.getCurrentUser(request);
         List<Post> posts = postRepository.findAllByAuthorId(authorId);
-        return posts.stream().map(post -> new PostResponseForProfile(
-                post.getId(),
-                post.getContent(),
-                post.getCreatedAt(),
-                post.getMediaFileName(),
-                post.getNumberOfLikes(),
-                post.getNumberOfComments(),
-                postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
+        return posts.stream().map(post ->
+                PostResponseForProfile.fromPost(
+                        post,
+                        postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
         )).toList();
     }
 
     @Override
     public List<PostResponseDto> getAllFromFriends(HttpServletRequest request) {
-        String email = JwtUtil.getEmailFromRequest(request);
-        User user = userRepository.findByEmail(email);
+        User user = userService.getCurrentUser(request);
         Set<User> friends = user.getFriends();
         return friends.stream().flatMap(friend -> postRepository.findAllByAuthorId(friend.getId()).stream())
                 .map(post ->
-                    new PostResponseDto(
-                            post.getId(),
-                            post.getContent(),
-                            new PostAuthorDto(post.getAuthor().getId(), post.getAuthor().getFullName(), post.getAuthor().getPictureBase64()),
-                            post.getMediaFileName(),
-                            post.getCreatedAt(),
-                            post.getNumberOfLikes(),
-                            post.getNumberOfComments(),
+                    PostResponseDto.fromPost(
+                            post,
                             postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
                     )
                 ).toList();
@@ -150,21 +162,18 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public Boolean like(Long postId, HttpServletRequest request) {
-        User user = userRepository.findByEmail(JwtUtil.getEmailFromRequest(request));
+        User user = userService.getCurrentUser(request);
         Post post = postRepository.findById(postId);
 
         boolean likeStatus = postLikeRepository.existsByUserIdAndPostId(user.getId(), postId);
         if (likeStatus) {
             post.setNumberOfLikes(post.getNumberOfLikes() - 1);
-
             postLikeRepository.deleteById(new PostLikeId(user.getId(), postId));
         } else {
             post.setNumberOfLikes(post.getNumberOfLikes() + 1);
-
             postLikeRepository.save(new PostLike(user, post));
-
-            postRepository.save(post);
         }
-        return ! likeStatus;
+        postRepository.save(post);
+        return !likeStatus;
     }
 }

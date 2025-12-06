@@ -1,9 +1,9 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.dto.LoginDto;
-import com.hossainrion.ReactSocial.dto.UserResponseDto;
-import com.hossainrion.ReactSocial.dto.UserSaveDto;
-import com.hossainrion.ReactSocial.dto.UserUpdateDto;
+import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserSaveDto;
+import com.hossainrion.ReactSocial.dto.forUser.UserUpdateDto;
 import com.hossainrion.ReactSocial.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +13,12 @@ import java.util.List;
 public interface UserService {
     UserResponseDto getUserById(Long id);
     UserResponseDto getUser(HttpServletRequest request);
+    User getCurrentUser(HttpServletRequest request);
     List<User> getAllUsers();
     Boolean addUser(UserSaveDto userSaveDto);
     Boolean updateUser(UserUpdateDto userUpdateDto, HttpServletRequest request);
     ResponseEntity<?> handleAuthentication(LoginDto loginDto);
-    User getUserByEmail(String email);
+    User getUserByUsername(String username);
     Boolean addFriend(Long id, HttpServletRequest request);
     List<UserResponseDto> getSentRequests(HttpServletRequest request);;
     List<User> getReceivedRequestsById(Long id);
@@ -27,5 +28,5 @@ public interface UserService {
     Boolean unfriend(Long id, HttpServletRequest request);
     Boolean cancelFriendRequest(Long id, HttpServletRequest request);
     Boolean cancelReceivedRequest(Long id, HttpServletRequest request);
-
+    List<UserResponseDto> getFriendsSuggestion(HttpServletRequest request);
 }

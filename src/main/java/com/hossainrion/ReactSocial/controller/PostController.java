@@ -1,14 +1,16 @@
 package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.dto.*;
+import com.hossainrion.ReactSocial.dto.forPost.PostResponseDto;
+import com.hossainrion.ReactSocial.dto.forPost.PostResponseForProfile;
+import com.hossainrion.ReactSocial.dto.forPost.PostSaveDto;
+import com.hossainrion.ReactSocial.dto.forPost.PostUpdateDto;
 import com.hossainrion.ReactSocial.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -30,6 +32,11 @@ public class PostController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         return postService.saveMedia(file);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Boolean> deletePost(@PathVariable Long postId, HttpServletRequest request) {
+        return ResponseEntity.ok(postService.deletePostById(postId, request));
     }
 
     @PostMapping("/upload/update")
