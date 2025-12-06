@@ -96,6 +96,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDto getUserById(Long id) {
+        return UserResponseDto.fromUser(userRepository.findById(id));
+    }
+
+    @Override
     public UserResponseDto getUser(HttpServletRequest request) {
         String email = JwtUtil.getEmailFromRequest(request);
         User user = userRepository.findByEmail(email);

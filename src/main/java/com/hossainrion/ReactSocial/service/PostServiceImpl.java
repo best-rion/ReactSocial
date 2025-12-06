@@ -27,13 +27,11 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostLikeRepository postLikeRepository;
-    private final PostLikeIdRepository postLikeIdRepository;
 
-    PostServiceImpl(PostRepository postRepository, UserRepository userRepository, PostLikeRepository postLikeRepository, PostLikeIdRepository postLikeIdRepository) {
+    PostServiceImpl(PostRepository postRepository, UserRepository userRepository, PostLikeRepository postLikeRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.postLikeRepository = postLikeRepository;
-        this.postLikeIdRepository = postLikeIdRepository;
     }
 
     @Override
@@ -73,10 +71,26 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseForProfile> getPosts(HttpServletRequest httpServletRequest) {
-        String email = JwtUtil.getEmailFromRequest(httpServletRequest);
+    public List<PostResponseForProfile> getPosts(HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
         User user = userRepository.findByEmail(email);
         List<Post> posts = postRepository.findAllByAuthorId(user.getId());
+        return posts.stream().map(post -> new PostResponseForProfile(
+                post.getId(),
+                post.getContent(),
+                post.getCreatedAt(),
+                post.getMediaFileName(),
+                post.getNumberOfLikes(),
+                post.getNumberOfComments(),
+                postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
+        )).toList();
+    }
+
+    @Override
+    public List<PostResponseForProfile> getPostsByAuthorId(Long authorId, HttpServletRequest request) {
+        String email = JwtUtil.getEmailFromRequest(request);
+        User user = userRepository.findByEmail(email);
+        List<Post> posts = postRepository.findAllByAuthorId(authorId);
         return posts.stream().map(post -> new PostResponseForProfile(
                 post.getId(),
                 post.getContent(),

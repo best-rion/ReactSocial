@@ -25,6 +25,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUser(request));
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok(userService.getUserById(userId));
+    }
+
     @PostMapping
     public ResponseEntity<Boolean> saveUser(@RequestBody UserSaveDto userSaveDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(userSaveDto));
@@ -33,11 +38,6 @@ public class UserController {
     @PutMapping
     public ResponseEntity<Boolean> updateUser(@RequestBody UserUpdateDto userUpdateDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.updateUser(userUpdateDto, request));
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<String>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers().stream().map(User::getUsername).toList());
     }
 
     @GetMapping("/friends-suggestion")

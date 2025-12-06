@@ -13,6 +13,7 @@ import java.util.List;
 public interface PostService {
     Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest request);
     List<PostResponseForProfile> getPosts(HttpServletRequest request);
+    List<PostResponseForProfile> getPostsByAuthorId(Long authorId, HttpServletRequest request);
     ResponseEntity<String> saveMedia(MultipartFile file);
     List<PostResponseDto> getAllFromFriends(HttpServletRequest request);
     Boolean like(Long postId, HttpServletRequest request);

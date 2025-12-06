@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
+    UserResponseDto getUserById(Long id);
     UserResponseDto getUser(HttpServletRequest request);
     List<User> getAllUsers();
     Boolean addUser(UserSaveDto userSaveDto);
