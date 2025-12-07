@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
+    Boolean usernameExists(String username);
     UserResponseDto getUserById(Long id);
     UserResponseDto getUser(HttpServletRequest request);
     User getCurrentUser(HttpServletRequest request);

@@ -47,6 +47,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Boolean usernameExists(String username) {
+        return userRepository.findByUsername(username) != null;
+    }
+
+    @Override
     @Transactional
     public Boolean addUser(UserSaveDto userSaveDto) {
         User user = new User();

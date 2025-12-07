@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -32,7 +33,14 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<Boolean> saveUser(@RequestBody UserSaveDto userSaveDto) {
+        if (userService.usernameExists(userSaveDto.username())) return ResponseEntity.status(HttpStatus.CONFLICT).body(false);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(userSaveDto));
+    }
+
+    @GetMapping("/check-username/{username}")
+    public Mono<ResponseEntity<Boolean>> checkUsername(@PathVariable("username") String username) {
+        return Mono.just(ResponseEntity.ok(userService.usernameExists(username)));
     }
 
     @PutMapping
