@@ -48,7 +48,7 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userUpdateDto, request));
     }
 
-    @GetMapping("/friends-suggestion")
+    @GetMapping("friends-suggestion")
     public ResponseEntity<List<UserResponseDto>> getFriendsSuggestion(HttpServletRequest request) {
         return ResponseEntity.ok(userService.getFriendsSuggestion(request));
     }
