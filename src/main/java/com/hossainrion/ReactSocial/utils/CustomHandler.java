@@ -5,6 +5,7 @@ import com.hossainrion.ReactSocial.messaging.dto.MessageToReceiveDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
 import com.hossainrion.ReactSocial.messaging.entity.Message;
 import com.hossainrion.ReactSocial.messaging.repository.MessageRepository;
+import com.hossainrion.ReactSocial.messaging.service.MessageService;
 import com.hossainrion.ReactSocial.repository.UserRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -20,13 +21,11 @@ import java.util.List;
 @Component
 public class CustomHandler extends TextWebSocketHandler{
 
-    private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
+    private final MessageService messageService;
     private final SessionManager sessionManager;
 
-    CustomHandler(MessageRepository messageRepository, UserRepository userRepository, SessionManager sessionManager) {
-        this.messageRepository = messageRepository;
-        this.userRepository = userRepository;
+    CustomHandler(MessageService service, SessionManager sessionManager) {
+        this.messageService = service;
         this.sessionManager = sessionManager;
     }
 
@@ -45,12 +44,7 @@ public class CustomHandler extends TextWebSocketHandler{
 
         String username = (String) session.getAttributes().get("username");
 
-        Message msg = new Message();
-        msg.setSender(userRepository.findByUsername(username));
-        msg.setReceiver(userRepository.findByUsername(receivedMessage.recipient()));
-        msg.setContent(receivedMessage.text());
-        msg.setTime(new Date());
-        msg = messageRepository.save(msg);
+        Message msg = messageService.sendMessage(username, receivedMessage.recipient(), receivedMessage.text());
 
         MessageToSendDto messageToSend = new MessageToSendDto(msg.getId(), username, receivedMessage.text(), msg.getTime().toString());
 

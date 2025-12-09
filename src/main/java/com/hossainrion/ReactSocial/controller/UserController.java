@@ -31,6 +31,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
+    @GetMapping("/username/{username}")
+    public ResponseEntity<UserResponseDto> getUserByUsername(@PathVariable("username") String username) {
+        return ResponseEntity.ok(UserResponseDto.fromUser(userService.getUserByUsername(username)));
+    }
+
     @PostMapping
     public ResponseEntity<Boolean> saveUser(@RequestBody UserSaveDto userSaveDto) {
         if (userService.usernameExists(userSaveDto.username())) return ResponseEntity.status(HttpStatus.CONFLICT).body(false);
