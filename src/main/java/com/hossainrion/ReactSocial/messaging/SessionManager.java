@@ -1,13 +1,11 @@
 package com.hossainrion.ReactSocial.messaging;
 
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 public class SessionManager {
 
     // Key: username, Value: WebSocketSession
@@ -25,6 +23,9 @@ public class SessionManager {
 
     public void removeSession(String username, WebSocketSession session) {
         sessions.get(username).remove(session);
+        if (sessions.get(username).isEmpty()) {
+            sessions.remove(username);
+        }
     }
 
     public List<WebSocketSession> getSessions(String username) {

@@ -102,8 +102,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserById(Long id) {
-        return UserResponseDto.fromUser(userRepository.findById(id));
+    public User getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
     @Override

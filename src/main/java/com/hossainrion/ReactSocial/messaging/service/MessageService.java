@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface MessageService {
-    Message sendMessage(String from, String to, String message);
+    Message saveMessage(String from, String to, String message);
     List<MessageToSendDto> getMessages(String from, HttpServletRequest request);
+    void setSeen(Long friendId, HttpServletRequest request);
+    Message getById(Long messageId);
 }

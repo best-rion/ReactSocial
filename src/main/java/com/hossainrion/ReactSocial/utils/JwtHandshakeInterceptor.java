@@ -20,16 +20,20 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         String token = null;
         for (String c : cookie.split(";")) {
-            if (c.trim().startsWith("auth-token="))
-                token = c.trim().substring("auth-token=".length());
+            if (c.trim().startsWith("auth-token=")) { token = c.trim().substring("auth-token=".length());}
         }
 
         if (token == null) return false;
 
         // VALIDATE YOUR JWT HERE
         String username = JwtUtil.getusernameFromToken(token);
-
         attributes.put("username", username);
+
+        String query = req.getURI().getQuery();
+        if (query != null && query.startsWith("friend=")) {
+            String friend = query.substring("friend=".length());
+            attributes.put("friend", friend);
+        }
         return true;
     }
 

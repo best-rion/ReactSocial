@@ -3,10 +3,7 @@ package com.hossainrion.ReactSocial.utils;
 import com.hossainrion.ReactSocial.messaging.SessionManager;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToReceiveDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
-import com.hossainrion.ReactSocial.messaging.entity.Message;
-import com.hossainrion.ReactSocial.messaging.repository.MessageRepository;
 import com.hossainrion.ReactSocial.messaging.service.MessageService;
-import com.hossainrion.ReactSocial.repository.UserRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -14,19 +11,18 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
+
+import static com.hossainrion.ReactSocial.utils.Util.sessionManager;
 
 
 @Component
 public class CustomHandler extends TextWebSocketHandler{
 
     private final MessageService messageService;
-    private final SessionManager sessionManager;
 
-    CustomHandler(MessageService service, SessionManager sessionManager) {
+    CustomHandler(MessageService service) {
         this.messageService = service;
-        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -38,26 +34,33 @@ public class CustomHandler extends TextWebSocketHandler{
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws InterruptedException {
 
         MessageToReceiveDto receivedMessage = Util.toObject(message.getPayload(), MessageToReceiveDto.class);
 
         String username = (String) session.getAttributes().get("username");
+        String friend = (String) session.getAttributes().get("friend");
 
-        Message msg = messageService.sendMessage(username, receivedMessage.recipient(), receivedMessage.text());
+        MessageToSendDto messageToSend = MessageToSendDto.of(
+                messageService.saveMessage(username, friend, receivedMessage.text())
+        );
 
-        MessageToSendDto messageToSend = new MessageToSendDto(msg.getId(), username, receivedMessage.text(), msg.getTime().toString());
+        sendMessage(friend, username, messageToSend); // To friend
 
-        sendMessage(username, messageToSend);
-        sendMessage(receivedMessage.recipient(), messageToSend);
+        Thread.sleep(500);
+
+        sendMessage(username, friend, MessageToSendDto.of(messageService.getById(messageToSend.id()))); // To self
     }
 
-    private void sendMessage(String username, MessageToSendDto messageToSend) {
-        if (username == null) return;
-        List<WebSocketSession> sessions = sessionManager.getSessions(username);
+    private void sendMessage(String owner, String dedicatedTo, MessageToSendDto messageToSend) {
+        if (owner == null) return;
+        List<WebSocketSession> sessions = sessionManager.getSessions(owner);
         if (sessions == null || sessions.isEmpty()) return;
         sessions.forEach(s -> {
             try {
+                String receiver = (String) s.getAttributes().get("friend");
+                if (! receiver.equals(dedicatedTo) ) return;
+
                 s.sendMessage(new TextMessage(Util.toJsonString(messageToSend)));
             } catch (IOException e) {
                 throw new RuntimeException(e);

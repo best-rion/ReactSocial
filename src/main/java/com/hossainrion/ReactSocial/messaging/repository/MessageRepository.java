@@ -2,6 +2,9 @@ package com.hossainrion.ReactSocial.messaging.repository;
 
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.messaging.entity.Message;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +14,9 @@ import java.util.List;
 public interface MessageRepository extends CrudRepository<Message, Long> {
 
     List<Message> findAllBySenderAndReceiver(User sender, User receiver);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE message SET seen=1 WHERE sender_id=:senderId AND receiver_id=:receiverId", nativeQuery = true)
+    void setSeenBySenderIdAndReceiverId(Long senderId, Long receiverId);
 }
