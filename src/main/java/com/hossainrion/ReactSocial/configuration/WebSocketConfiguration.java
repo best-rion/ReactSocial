@@ -8,9 +8,15 @@ import org.springframework.web.socket.config.annotation.*;
 @Configuration
 @EnableWebSocket
 public class WebSocketConfiguration implements WebSocketConfigurer {
+
+    private final CustomHandler customHandler;
+    WebSocketConfiguration(CustomHandler customHandler) {
+        this.customHandler = customHandler;
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new CustomHandler(), "/ws-chat")
+        registry.addHandler(customHandler, "/ws-chat")
                 .setAllowedOrigins("http://localhost:5173")
                 .addInterceptors(new JwtHandshakeInterceptor());
     }

@@ -20,7 +20,6 @@ public class Util {
     private static final String MEDIA_PHOTOS_PATH = "/home/hossain/Desktop/photos/";
     private static final String MEDIA_VIDEOS_PATH = "/home/hossain/Desktop/videos/";
     private static final ObjectMapper mapper = new ObjectMapper();
-    static final SessionManager sessionManager = new SessionManager();
 
     /**
      * @param fileBase64 base64 file
