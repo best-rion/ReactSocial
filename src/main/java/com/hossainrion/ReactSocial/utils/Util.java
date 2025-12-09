@@ -3,7 +3,8 @@ package com.hossainrion.ReactSocial.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hossainrion.ReactSocial.messaging.SessionManager;
 import io.micrometer.common.util.StringUtils;
-import org.hibernate.Session;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,6 +48,34 @@ public class Util {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static ResponseEntity<String> saveMediaPhoto(MultipartFile file) {
+        if (file == null || file.isEmpty() || file.getContentType() == null) return ResponseEntity.badRequest().build();
+
+        try {
+            String type = file.getContentType();
+            if (type.equals("image/png") || type.equals("image/jpeg")) {
+                String fileName = UUID.randomUUID() + ".png";
+                File dest = new File(MEDIA_PHOTOS_PATH + fileName);
+                file.transferTo(dest);
+                return ResponseEntity.ok(fileName);
+            } else if (type.equals("video/mp4")) {
+                String fileName = UUID.randomUUID() + ".mp4";
+                File dest = new File(MEDIA_VIDEOS_PATH + fileName);
+                file.transferTo(dest);
+                return ResponseEntity.ok(fileName);
+            } else if (type.equals("video/webm")) {
+                String fileName = UUID.randomUUID() + ".webm";
+                File dest = new File(MEDIA_VIDEOS_PATH + fileName);
+                file.transferTo(dest);
+                return ResponseEntity.ok(fileName);
+            }
+            return ResponseEntity.badRequest().build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Upload failed");
         }
     }
 

@@ -38,25 +38,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public ResponseEntity<String> saveMedia(MultipartFile file) {
-        String uploadDir = "/home/hossain/Desktop/"; // create this folder in project root
-        try {
-            String type = file.getContentType();
-            if (type != null && type.equals("image/png")) {
-                String fileName = UUID.randomUUID() + ".png";
-                File dest = new File(uploadDir + "photos/" + fileName);
-                file.transferTo(dest);
-                return ResponseEntity.ok(fileName);
-            } else if (type != null && type.equals("video/mp4")) {
-                String fileName = UUID.randomUUID() + ".mp4";
-                File dest = new File(uploadDir + "videos/" + fileName);
-                file.transferTo(dest);
-                return ResponseEntity.ok(fileName);
-            }
-            return ResponseEntity.badRequest().build();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Upload failed");
-        }
+        return Util.saveMediaPhoto(file);
     }
 
     @Override
