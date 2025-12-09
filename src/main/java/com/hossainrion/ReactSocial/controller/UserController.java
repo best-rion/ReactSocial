@@ -2,6 +2,7 @@ package com.hossainrion.ReactSocial.controller;
 
 import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.dto.IdDto;
+import com.hossainrion.ReactSocial.dto.forUser.FriendStatus;
 import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
 import com.hossainrion.ReactSocial.dto.forUser.UserSaveDto;
 import com.hossainrion.ReactSocial.dto.forUser.UserUpdateDto;
@@ -27,8 +28,10 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(UserResponseDto.fromUser(userService.getUserById(userId)));
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") Long userId, HttpServletRequest request) {
+        User otherUser = userService.getUserById(userId);
+        FriendStatus status = userService.getFriendStatus(otherUser, request);
+        return ResponseEntity.ok(UserResponseDto.fromUserWithFriendStatus(otherUser, status));
     }
 
     @GetMapping("/username/{username}")
@@ -93,7 +96,7 @@ public class UserController {
         return ResponseEntity.ok(userService.cancelFriendRequest(userIdDto.id(), request));
     }
 
-    @PutMapping("cancel-received-request")
+    @PutMapping("reject-request")
     public ResponseEntity<Boolean> cancelReceivedRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
         return ResponseEntity.ok(userService.cancelReceivedRequest(userIdDto.id(), request));
     }

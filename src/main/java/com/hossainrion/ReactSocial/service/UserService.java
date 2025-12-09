@@ -1,9 +1,6 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
-import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
-import com.hossainrion.ReactSocial.dto.forUser.UserSaveDto;
-import com.hossainrion.ReactSocial.dto.forUser.UserUpdateDto;
+import com.hossainrion.ReactSocial.dto.forUser.*;
 import com.hossainrion.ReactSocial.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
+    FriendStatus getFriendStatus(User otherUser, HttpServletRequest request);
     Boolean usernameExists(String username);
     User getUserById(Long id);
     UserResponseDto getUser(HttpServletRequest request);

@@ -1,12 +1,9 @@
 package com.hossainrion.ReactSocial.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
+import com.hossainrion.ReactSocial.dto.forUser.*;
 import com.hossainrion.ReactSocial.utils.Util;
 import com.hossainrion.ReactSocial.dto.*;
-import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
-import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
-import com.hossainrion.ReactSocial.dto.forUser.UserSaveDto;
-import com.hossainrion.ReactSocial.dto.forUser.UserUpdateDto;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +36,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getCurrentUser(HttpServletRequest request) {
         return userRepository.findByUsername(JwtUtil.getusernameFromRequest(request));
+    }
+
+    @Override
+    public FriendStatus getFriendStatus(User otherUser, HttpServletRequest request) {
+        User currentUser = getCurrentUser(request);
+        if (currentUser.getFriends().contains(otherUser)) return FriendStatus.FRIEND;
+        if (currentUser.getSentRequests().contains(otherUser)) return FriendStatus.SENT;
+        if (otherUser.getSentRequests().contains(currentUser)) return FriendStatus.RECEIVED;
+        return FriendStatus.UNKNOWN;
     }
 
     @Override

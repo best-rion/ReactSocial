@@ -13,4 +13,16 @@ public record UserResponseDto(Long id, String fullName, String username, String 
                 null
         );
     }
+
+    public static UserResponseDto fromUserWithFriendStatus(User user, FriendStatus friendStatus) {
+        return new UserResponseDto(
+                user.getId(),
+                user.getFullName(),
+                user.getUsername(),
+                user.getBio(),
+                user.getPictureBase64(),
+                friendStatus
+        );
+    }
+
 }
