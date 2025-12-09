@@ -1,7 +1,6 @@
 package com.hossainrion.ReactSocial.messaging.service;
 
 import com.hossainrion.ReactSocial.entity.User;
-import com.hossainrion.ReactSocial.messaging.SessionManager;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
 import com.hossainrion.ReactSocial.messaging.entity.Message;
 import com.hossainrion.ReactSocial.messaging.repository.MessageRepository;
