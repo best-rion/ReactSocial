@@ -1,6 +1,9 @@
-package com.hossainrion.ReactSocial;
+package com.hossainrion.ReactSocial.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hossainrion.ReactSocial.messaging.SessionManager;
 import io.micrometer.common.util.StringUtils;
+import org.hibernate.Session;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +19,8 @@ public class Util {
     private static final String PROFILE_PICTURE_PATH = "/home/hossain/Desktop/profile_pictures/";
     private static final String MEDIA_PHOTOS_PATH = "/home/hossain/Desktop/photos/";
     private static final String MEDIA_VIDEOS_PATH = "/home/hossain/Desktop/videos/";
+    private static final ObjectMapper mapper = new ObjectMapper();
+    static final SessionManager sessionManager = new SessionManager();
 
     /**
      * @param fileBase64 base64 file
@@ -84,4 +89,22 @@ public class Util {
         }
         return "";
     }
+
+    public static String toJsonString(Object object) {
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static <T> T toObject(String jsonString, Class<T> clazz) {
+        try {
+            return mapper.readValue(jsonString, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse JSON", e);
+        }
+    }
+
 }

@@ -1,7 +1,7 @@
 package com.hossainrion.ReactSocial.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
-import com.hossainrion.ReactSocial.Util;
+import com.hossainrion.ReactSocial.utils.Util;
 import com.hossainrion.ReactSocial.dto.*;
 import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
 import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;

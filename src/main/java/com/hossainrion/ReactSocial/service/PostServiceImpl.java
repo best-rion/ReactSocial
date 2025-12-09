@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.Util;
+import com.hossainrion.ReactSocial.utils.Util;
 import com.hossainrion.ReactSocial.dto.forPost.PostResponseDto;
 import com.hossainrion.ReactSocial.dto.forPost.PostResponseForProfile;
 import com.hossainrion.ReactSocial.dto.forPost.PostSaveDto;

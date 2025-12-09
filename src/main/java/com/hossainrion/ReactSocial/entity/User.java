@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.entity;
 
-import com.hossainrion.ReactSocial.Util;
+import com.hossainrion.ReactSocial.utils.Util;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
