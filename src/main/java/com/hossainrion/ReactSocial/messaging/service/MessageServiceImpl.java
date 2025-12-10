@@ -74,7 +74,7 @@ public class MessageServiceImpl implements MessageService {
                 if (! receiver.equals(thisUser.getUsername())) return;
 
                 try {
-                    s.sendMessage(new TextMessage("seen" + thisUser.getUsername()));
+                    s.sendMessage(new TextMessage("seen"));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
