@@ -18,7 +18,7 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentResponseDto> createComment(@RequestBody CommentSaveDto commentSaveDto, HttpServletRequest request) {
-        return ResponseEntity.ok(commentService.saveComment(commentSaveDto, request));
+        return commentService.saveComment(commentSaveDto, request);
     }
 
     @GetMapping("/{postId}")

@@ -7,6 +7,8 @@ import com.hossainrion.ReactSocial.messaging.entity.Message;
 import com.hossainrion.ReactSocial.messaging.repository.MessageRepository;
 import com.hossainrion.ReactSocial.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -42,19 +44,25 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<MessageToSendDto> getMessages(String from, HttpServletRequest request) {
-        User friend = userService.getUserByUsername(from);
-        User me = userService.getCurrentUser(request);
+    public ResponseEntity<List<MessageToSendDto>> getMessages(String from, HttpServletRequest request) {
+        User thisUser = userService.getCurrentUser(request);
+        if (thisUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        List<Message> friendAndMe = messageRepository.findAllBySenderAndReceiver(friend, me);
-        List<Message> meAndFriend = messageRepository.findAllBySenderAndReceiver(me, friend);
-        return Stream.concat(friendAndMe.stream(), meAndFriend.stream()).sorted(Comparator.comparing(Message::getTime)).map(MessageToSendDto::of).toList();
+        User friend = userService.getUserByUsername(from);
+        if (friend == null) return ResponseEntity.notFound().build();
+
+        List<Message> friendAndMe = messageRepository.findAllBySenderAndReceiver(friend, thisUser);
+        List<Message> meAndFriend = messageRepository.findAllBySenderAndReceiver(thisUser , friend);
+        return ResponseEntity.ok(Stream.concat(friendAndMe.stream(), meAndFriend.stream()).sorted(Comparator.comparing(Message::getTime)).map(MessageToSendDto::of).toList());
     }
 
     @Override
     public void setSeen(Long friendId, HttpServletRequest request) {
         User thisUser = userService.getCurrentUser(request);
         User friend = userService.getUserById(friendId);
+
+        if (thisUser == null || friend == null) return;
+
         messageRepository.setSeenBySenderIdAndReceiverId(friendId, thisUser.getId());
 
         List<WebSocketSession> sessions = sessionManager.getSessions(friend.getUsername());
@@ -81,9 +89,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<MessageProfileDto> getAll(HttpServletRequest request) {
+    public ResponseEntity<List<MessageProfileDto>> getAll(HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
-        return messageRepository.findAllForMessgePage(user.getId()).stream().map(
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        return ResponseEntity.ok(
+                messageRepository.findAllForMessgePage(user.getId()).stream().map(
                 message -> {
                     Boolean isSender = user.getUsername().equals(message.getReceiver().getUsername());
                     User profile = isSender ? message.getSender() : message.getReceiver();
@@ -96,7 +107,7 @@ public class MessageServiceImpl implements MessageService {
                             message.getTime(),
                             messageRepository.countBySeenEqualsAndReceiverEqualsAndSenderEquals(0, message.getReceiver(), message.getSender())
                     );
-                }
-        ).toList();
+                }).toList()
+        );
     }
 }

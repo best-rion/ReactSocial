@@ -12,15 +12,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface PostService {
-    Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest request);
-    List<PostResponseForProfile> getPosts(HttpServletRequest request);
-    List<PostResponseForProfile> getPostsByAuthorId(Long authorId, HttpServletRequest request);
+    ResponseEntity<Boolean> addPost(PostSaveDto postSaveDto, HttpServletRequest request);
+    ResponseEntity<List<PostResponseForProfile>> getPosts(HttpServletRequest request);
+    ResponseEntity<List<PostResponseForProfile>> getPostsByAuthorId(Long authorId, HttpServletRequest request);
     ResponseEntity<String> saveMedia(MultipartFile file);
     ResponseEntity<String> updateMedia(MultipartFile file, Long postId);
-    List<PostResponseDto> getAllFromFriends(HttpServletRequest request);
-    Boolean like(Long postId, HttpServletRequest request);
-    Boolean updatePost(PostUpdateDto postUpdateDto, HttpServletRequest request);
-    Boolean deletePostById(Long postId, HttpServletRequest request);
+    ResponseEntity<List<PostResponseDto>> getAllFromFriends(HttpServletRequest request);
+    ResponseEntity<Boolean> like(Long postId, HttpServletRequest request);
+    ResponseEntity<Boolean> updatePost(PostUpdateDto postUpdateDto, HttpServletRequest request);
+    ResponseEntity<Boolean> deletePostById(Long postId, HttpServletRequest request);
     Post getPostById(Long postId);
     void incrementCommentCount(Post post);
 }

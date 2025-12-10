@@ -25,7 +25,7 @@ public class MessageController {
 
     @GetMapping("/{friendName}")
     public ResponseEntity<List<MessageToSendDto>> getMessage(@PathVariable("friendName") String friendName, HttpServletRequest request) {
-        return ResponseEntity.ok(messageService.getMessages(friendName, request));
+        return messageService.getMessages(friendName, request);
     }
 
     @PostMapping("/seen")
@@ -35,6 +35,6 @@ public class MessageController {
 
     @GetMapping("/all")
     public ResponseEntity<List<MessageProfileDto>> getAll(HttpServletRequest request) {
-        return ResponseEntity.ok(messageService.getAll(request));
+        return messageService.getAll(request);
     }
 }

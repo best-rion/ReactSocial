@@ -24,13 +24,18 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<UserResponseDto> getUser(HttpServletRequest request) {
-        return ResponseEntity.ok(userService.getUser(request));
+        return userService.getUser(request);
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") Long userId, HttpServletRequest request) {
+        User currentUser = userService.getCurrentUser(request);
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         User otherUser = userService.getUserById(userId);
-        FriendStatus status = userService.getFriendStatus(otherUser, request);
+        if (otherUser == null) return ResponseEntity.notFound().build();
+
+        FriendStatus status = userService.getFriendStatus(otherUser, currentUser);
         return ResponseEntity.ok(UserResponseDto.fromUserWithFriendStatus(otherUser, status));
     }
 
@@ -53,51 +58,51 @@ public class UserController {
 
     @PutMapping
     public ResponseEntity<Boolean> updateUser(@RequestBody UserUpdateDto userUpdateDto, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.updateUser(userUpdateDto, request));
+        return userService.updateUser(userUpdateDto, request);
     }
 
     @GetMapping("friends-suggestion")
     public ResponseEntity<List<UserResponseDto>> getFriendsSuggestion(HttpServletRequest request) {
-        return ResponseEntity.ok(userService.getFriendsSuggestion(request));
+        return userService.getFriendsSuggestion(request);
     }
 
     @PutMapping("add-friend")
     public ResponseEntity<Boolean> addFriend(@RequestBody IdDto userIdDto, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.addFriend(userIdDto.id(), request));
+        return userService.addFriend(userIdDto.id(), request);
     }
 
     @GetMapping("sent-requests")
     public ResponseEntity<List<UserResponseDto>> getSentRequests(HttpServletRequest request) {
-        return ResponseEntity.ok(userService.getSentRequests(request));
+        return userService.getSentRequests(request);
     }
 
     @GetMapping("received-requests")
     public ResponseEntity<List<UserResponseDto>> getReceivedRequests(HttpServletRequest request) {
-        return ResponseEntity.ok(userService.getReceivedRequests(request));
+        return userService.getReceivedRequests(request);
     }
 
     @PutMapping("accept-request")
     public ResponseEntity<Boolean> acceptRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.acceptFriendRequest(userIdDto.id(), request));
+        return userService.acceptFriendRequest(userIdDto.id(), request);
     }
 
     @GetMapping("friends")
     public ResponseEntity<List<UserResponseDto>> getFriends(HttpServletRequest request) {
-        return ResponseEntity.ok(userService.getFriends(request));
+        return userService.getFriends(request);
     }
 
     @PutMapping("unfriend")
     public ResponseEntity<Boolean> unfriend(@RequestBody IdDto userIdDto, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.unfriend(userIdDto.id(), request));
+        return userService.unfriend(userIdDto.id(), request);
     }
 
     @PutMapping("cancel-request")
     public ResponseEntity<Boolean> cancelRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.cancelFriendRequest(userIdDto.id(), request));
+        return userService.cancelFriendRequest(userIdDto.id(), request);
     }
 
     @PutMapping("reject-request")
     public ResponseEntity<Boolean> cancelReceivedRequest(@RequestBody IdDto userIdDto, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.cancelReceivedRequest(userIdDto.id(), request));
+        return userService.cancelReceivedRequest(userIdDto.id(), request);
     }
 }

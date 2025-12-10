@@ -26,7 +26,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         if (token == null) return false;
 
         // VALIDATE YOUR JWT HERE
-        String username = JwtUtil.getusernameFromToken(token);
+        String username = JwtUtil.getUsernameFromToken(token);
         attributes.put("username", username);
 
         String query = req.getURI().getQuery();

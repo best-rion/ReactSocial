@@ -21,12 +21,12 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<Boolean> createPost(@RequestBody PostSaveDto postSaveDto, HttpServletRequest request) {
-        return ResponseEntity.ok(postService.addPost(postSaveDto, request));
+        return postService.addPost(postSaveDto, request);
     }
 
     @PostMapping("/update")
     public ResponseEntity<Boolean> updatePost(@RequestBody PostUpdateDto postUpdateDto, HttpServletRequest request) {
-        return ResponseEntity.ok(postService.updatePost(postUpdateDto, request));
+        return postService.updatePost(postUpdateDto, request);
     }
 
     @PostMapping("/upload")
@@ -36,7 +36,7 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Boolean> deletePost(@PathVariable Long postId, HttpServletRequest request) {
-        return ResponseEntity.ok(postService.deletePostById(postId, request));
+        return postService.deletePostById(postId, request);
     }
 
     @PostMapping("/upload/update")
@@ -46,21 +46,21 @@ public class PostController {
 
     @GetMapping("/get-for-profile")
     public ResponseEntity<List<PostResponseForProfile>> getPostForProfile(HttpServletRequest request) {
-        return ResponseEntity.ok(postService.getPosts(request));
+        return postService.getPosts(request);
     }
 
     @GetMapping("/get-for-profile/{profileId}")
     public ResponseEntity<List<PostResponseForProfile>> getPostForProfile(@PathVariable("profileId") Long profileId, HttpServletRequest request) {
-        return ResponseEntity.ok(postService.getPostsByAuthorId(profileId, request));
+        return postService.getPostsByAuthorId(profileId, request);
     }
 
     @GetMapping("/get-for-homepage")
     public ResponseEntity<List<PostResponseDto>> getPostForHomepage(HttpServletRequest request) {
-        return ResponseEntity.ok(postService.getAllFromFriends(request));
+        return postService.getAllFromFriends(request);
     }
 
     @PostMapping("/like")
     public ResponseEntity<Boolean> likePost(@RequestBody IdDto postIdDto, HttpServletRequest request) {
-        return ResponseEntity.ok(postService.like(postIdDto.id(), request));
+        return postService.like(postIdDto.id(), request);
     }
 }

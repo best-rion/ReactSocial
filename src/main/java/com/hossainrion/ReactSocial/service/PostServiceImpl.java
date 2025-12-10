@@ -14,6 +14,7 @@ import com.hossainrion.ReactSocial.repository.PostLikeRepository;
 import com.hossainrion.ReactSocial.repository.PostRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,8 +50,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Boolean addPost(PostSaveDto postSaveDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> addPost(PostSaveDto postSaveDto, HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         Post post = Post.builder().
                 content(postSaveDto.content()).
                 mediaFileName(postSaveDto.fileName()).
@@ -59,11 +62,14 @@ public class PostServiceImpl implements PostService {
                 numberOfComments((long) 0).
                 createdAt(new Date()).build();
         postRepository.save(post);
-        return true;
+        return ResponseEntity.ok(true);
     }
 
     @Override
-    public Boolean updatePost(PostUpdateDto postUpdateDto, HttpServletRequest request) {
+    public ResponseEntity<Boolean> updatePost(PostUpdateDto postUpdateDto, HttpServletRequest request) {
+        User user = userService.getCurrentUser(request);
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         Post post = postRepository.findById(postUpdateDto.id());
         post.setContent(postUpdateDto.content());
         if (! postUpdateDto.fileName().isEmpty())
@@ -76,22 +82,28 @@ public class PostServiceImpl implements PostService {
             }
         }
         postRepository.save(post);
-        return true;
+        return ResponseEntity.ok(true);
     }
 
     @Override
     @Transactional
-    public Boolean deletePostById(Long postId, HttpServletRequest request) {
+    public ResponseEntity<Boolean> deletePostById(Long postId, HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         Post post = postRepository.findById(postId);
-        if (post.getAuthor().getId() != user.getId()) return false;
+        if (post == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        if (post.getAuthor().getId() != user.getId()) return ResponseEntity.ok(false);
+
         if (! post.getMediaFileName().isEmpty()) {
             Util.deleteMedia(post.getMediaFileName());
         }
+
         postLikeRepository.deleteAllByPost(post);
         commentRepository.deleteAllByPost(post);
         postRepository.delete(post);
-        return true;
+        return ResponseEntity.ok(true);
     }
 
     @Override
@@ -106,46 +118,53 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponseForProfile> getPosts(HttpServletRequest request) {
+    public ResponseEntity<List<PostResponseForProfile>> getPosts(HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
-        List<Post> posts = postRepository.findAllByAuthorId(user.getId());
-        return posts.stream().map(post ->
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        List<PostResponseForProfile> posts = postRepository.findAllByAuthorId(user.getId()).stream().map(post ->
                 PostResponseForProfile.fromPost(
                         post,
                         postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
                 )
         ).toList();
+        return ResponseEntity.ok(posts);
     }
 
     @Override
-    public List<PostResponseForProfile> getPostsByAuthorId(Long authorId, HttpServletRequest request) {
+    public ResponseEntity<List<PostResponseForProfile>> getPostsByAuthorId(Long authorId, HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
-        List<Post> posts = postRepository.findAllByAuthorId(authorId);
-        return posts.stream().map(post ->
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        List<PostResponseForProfile> posts = postRepository.findAllByAuthorId(authorId).stream().map(post ->
                 PostResponseForProfile.fromPost(
                         post,
                         postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
         )).toList();
+        return ResponseEntity.ok(posts);
     }
 
     @Override
-    public List<PostResponseDto> getAllFromFriends(HttpServletRequest request) {
+    public ResponseEntity<List<PostResponseDto>> getAllFromFriends(HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         Set<User> friends = user.getFriends();
-        return friends.stream().flatMap(friend -> postRepository.findAllByAuthorId(friend.getId()).stream())
+        List<PostResponseDto> posts = friends.stream().flatMap(friend -> postRepository.findAllByAuthorId(friend.getId()).stream())
                 .map(post ->
                     PostResponseDto.fromPost(
                             post,
                             postLikeRepository.existsByUserIdAndPostId(user.getId(), post.getId())
                     )
                 ).toList();
+        return ResponseEntity.ok(posts);
     }
 
     @Override
     @Transactional
-    public Boolean like(Long postId, HttpServletRequest request) {
+    public ResponseEntity<Boolean> like(Long postId, HttpServletRequest request) {
         User user = userService.getCurrentUser(request);
+        if (user == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         Post post = postRepository.findById(postId);
+        if (post == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         boolean likeStatus = postLikeRepository.existsByUserIdAndPostId(user.getId(), postId);
         if (likeStatus) {
@@ -156,6 +175,6 @@ public class PostServiceImpl implements PostService {
             postLikeRepository.save(new PostLike(user, post));
         }
         postRepository.save(post);
-        return !likeStatus;
+        return ResponseEntity.ok(!likeStatus);
     }
 }

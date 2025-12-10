@@ -8,6 +8,8 @@ import com.hossainrion.ReactSocial.entity.Post;
 import com.hossainrion.ReactSocial.entity.User;
 import com.hossainrion.ReactSocial.repository.CommentRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -26,9 +28,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentResponseDto saveComment(CommentSaveDto commentSaveDto, HttpServletRequest request) {
+    public ResponseEntity<CommentResponseDto> saveComment(CommentSaveDto commentSaveDto, HttpServletRequest request) {
         User author = userService.getCurrentUser(request);
+        if (author == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
         Post post = postService.getPostById(commentSaveDto.postId());
+        if (post == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
         Comment comment = Comment.builder().
                 author(author).
                 post(post).
@@ -36,7 +42,7 @@ public class CommentServiceImpl implements CommentService {
                 createdAt(new Date()).build();
         comment = commentRepository.save(comment);
         postService.incrementCommentCount(post);
-        return new CommentResponseDto(comment.getId(), comment.getCreatedAt());
+        return ResponseEntity.ok(new CommentResponseDto(comment.getId(), comment.getCreatedAt()));
     }
 
     @Override
