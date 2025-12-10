@@ -5,6 +5,7 @@ import java.util.Date;
 import com.hossainrion.ReactSocial.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
@@ -24,8 +25,10 @@ public class Message
     private Date time;
 
     @ManyToOne
+    @NonNull
     private User sender;
     @ManyToOne
+    @NonNull
     private User receiver;
     private int seen;
 }

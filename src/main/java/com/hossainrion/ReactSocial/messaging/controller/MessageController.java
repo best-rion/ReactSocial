@@ -2,6 +2,7 @@ package com.hossainrion.ReactSocial.messaging.controller;
 
 import com.hossainrion.ReactSocial.dto.IdDto;
 import com.hossainrion.ReactSocial.entity.User;
+import com.hossainrion.ReactSocial.messaging.dto.MessageProfileDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
 import com.hossainrion.ReactSocial.messaging.entity.Message;
 import com.hossainrion.ReactSocial.messaging.service.MessageService;
@@ -30,5 +31,10 @@ public class MessageController {
     @PostMapping("/seen")
     public void seenMessages(@RequestBody IdDto friendId, HttpServletRequest request) {
         messageService.setSeen(friendId.id(), request);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<MessageProfileDto>> getAll(HttpServletRequest request) {
+        return ResponseEntity.ok(messageService.getAll(request));
     }
 }

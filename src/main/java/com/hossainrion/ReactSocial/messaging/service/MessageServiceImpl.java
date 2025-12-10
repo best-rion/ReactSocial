@@ -1,6 +1,7 @@
 package com.hossainrion.ReactSocial.messaging.service;
 
 import com.hossainrion.ReactSocial.entity.User;
+import com.hossainrion.ReactSocial.messaging.dto.MessageProfileDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
 import com.hossainrion.ReactSocial.messaging.entity.Message;
 import com.hossainrion.ReactSocial.messaging.repository.MessageRepository;
@@ -11,6 +12,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -76,5 +78,25 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message getById(Long messageId) {
         return messageRepository.findById(messageId).orElse(null);
+    }
+
+    @Override
+    public List<MessageProfileDto> getAll(HttpServletRequest request) {
+        User user = userService.getCurrentUser(request);
+        return messageRepository.findAllForMessgePage(user.getId()).stream().map(
+                message -> {
+                    Boolean isSender = user.getUsername().equals(message.getReceiver().getUsername());
+                    User profile = isSender ? message.getSender() : message.getReceiver();
+                    return new MessageProfileDto(
+                            profile.getUsername(),
+                            isSender,
+                            profile.getFullName(),
+                            profile.getPictureBase64(),
+                            message.getContent(),
+                            message.getTime(),
+                            messageRepository.countBySeenEqualsAndReceiverEqualsAndSenderEquals(0, message.getReceiver(), message.getSender())
+                    );
+                }
+        ).toList();
     }
 }
