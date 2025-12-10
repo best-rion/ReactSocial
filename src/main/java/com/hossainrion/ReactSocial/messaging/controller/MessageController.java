@@ -29,8 +29,8 @@ public class MessageController {
     }
 
     @PostMapping("/seen")
-    public void seenMessages(@RequestBody IdDto friendId, HttpServletRequest request) {
-        messageService.setSeen(friendId.id(), request);
+    public ResponseEntity<Boolean> seenMessages(@RequestBody IdDto friendId, HttpServletRequest request) {
+        return messageService.setSeen(friendId.id(), request);
     }
 
     @GetMapping("/all")

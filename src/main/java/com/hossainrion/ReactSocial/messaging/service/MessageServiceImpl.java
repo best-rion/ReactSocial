@@ -57,11 +57,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void setSeen(Long friendId, HttpServletRequest request) {
+    public ResponseEntity<Boolean> setSeen(Long friendId, HttpServletRequest request) {
         User thisUser = userService.getCurrentUser(request);
-        User friend = userService.getUserById(friendId);
+        if (thisUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        if (thisUser == null || friend == null) return;
+        User friend = userService.getUserById(friendId);
+        if (friend == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         messageRepository.setSeenBySenderIdAndReceiverId(friendId, thisUser.getId());
 
@@ -81,6 +82,7 @@ public class MessageServiceImpl implements MessageService {
         } else {
             System.out.println("No sessions found for " + friend.getUsername());
         }
+        return ResponseEntity.ok(true);
     }
 
     @Override

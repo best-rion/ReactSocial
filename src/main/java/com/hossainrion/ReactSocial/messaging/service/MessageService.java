@@ -11,7 +11,7 @@ import java.util.List;
 public interface MessageService {
     Message saveMessage(String from, String to, String message);
     ResponseEntity<List<MessageToSendDto>> getMessages(String from, HttpServletRequest request);
-    void setSeen(Long friendId, HttpServletRequest request);
+    ResponseEntity<Boolean> setSeen(Long friendId, HttpServletRequest request);
     Message getById(Long messageId);
     ResponseEntity<List<MessageProfileDto>> getAll(HttpServletRequest request);
 }
