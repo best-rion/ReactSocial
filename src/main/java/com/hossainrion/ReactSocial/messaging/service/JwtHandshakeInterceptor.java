@@ -1,4 +1,4 @@
-package com.hossainrion.ReactSocial.utils;
+package com.hossainrion.ReactSocial.messaging.service;
 
 import com.hossainrion.ReactSocial.JwtUtil;
 import org.springframework.http.server.ServerHttpRequest;

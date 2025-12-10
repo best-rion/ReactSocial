@@ -1,9 +1,8 @@
-package com.hossainrion.ReactSocial.utils;
+package com.hossainrion.ReactSocial.messaging.service;
 
-import com.hossainrion.ReactSocial.messaging.SessionManager;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToReceiveDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
-import com.hossainrion.ReactSocial.messaging.service.MessageService;
+import com.hossainrion.ReactSocial.utils.Util;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;

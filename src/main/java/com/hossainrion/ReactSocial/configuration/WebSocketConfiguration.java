@@ -1,7 +1,7 @@
 package com.hossainrion.ReactSocial.configuration;
 
-import com.hossainrion.ReactSocial.utils.CustomHandler;
-import com.hossainrion.ReactSocial.utils.JwtHandshakeInterceptor;
+import com.hossainrion.ReactSocial.messaging.service.CustomHandler;
+import com.hossainrion.ReactSocial.messaging.service.JwtHandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
 
