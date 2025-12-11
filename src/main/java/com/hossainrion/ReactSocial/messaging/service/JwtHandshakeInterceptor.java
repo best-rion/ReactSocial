@@ -27,12 +27,14 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         // VALIDATE YOUR JWT HERE
         String username = JwtUtil.getUsernameFromToken(token);
-        attributes.put("username", username);
+        if (username == null) return false;
+
+        attributes.put("owner", username);
 
         String query = req.getURI().getQuery();
         if (query != null && query.startsWith("friend=")) {
             String friend = query.substring("friend=".length());
-            attributes.put("friend", friend);
+            attributes.put("dedicatedTo", friend);
         }
         return true;
     }

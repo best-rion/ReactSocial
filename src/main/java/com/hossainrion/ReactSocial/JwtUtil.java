@@ -6,7 +6,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -16,8 +15,8 @@ import java.util.Date;
 @Component
 public  class JwtUtil {
     private static final SecretKey secretKey = Keys.hmacShaKeyFor("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad".getBytes(StandardCharsets.UTF_8));
-    public static final long JWT_TOKEN_EXPIRATION_TIME_IN_SECONDS = 5 ;
-    public static final long REFRESH_TOKEN_EXPIRATION_TIME_IN_SECONDS = 60 ;
+    public static final long JWT_TOKEN_EXPIRATION_TIME_IN_SECONDS = 5 * 60 ;
+    public static final long REFRESH_TOKEN_EXPIRATION_TIME_IN_SECONDS = 60 * 60;
 
 
     public static String generateJwtToken(String username) {

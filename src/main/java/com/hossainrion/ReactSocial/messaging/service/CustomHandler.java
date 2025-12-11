@@ -1,7 +1,10 @@
 package com.hossainrion.ReactSocial.messaging.service;
 
+import com.hossainrion.ReactSocial.entity.User;
+import com.hossainrion.ReactSocial.messaging.dto.MessageProfileDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToReceiveDto;
 import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
+import com.hossainrion.ReactSocial.service.UserService;
 import com.hossainrion.ReactSocial.utils.Util;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -19,14 +22,16 @@ import static com.hossainrion.ReactSocial.utils.Util.sessionManager;
 public class CustomHandler extends TextWebSocketHandler{
 
     private final MessageService messageService;
+    private final UserService userService;
 
-    CustomHandler(MessageService service) {
+    CustomHandler(MessageService service, UserService userService) {
         this.messageService = service;
+        this.userService = userService;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        String username = (String) session.getAttributes().get("username");
+        String username = (String) session.getAttributes().get("owner");
         if (username != null) {
             sessionManager.addSession(username, session);
         }
@@ -37,8 +42,8 @@ public class CustomHandler extends TextWebSocketHandler{
 
         MessageToReceiveDto receivedMessage = Util.toObject(message.getPayload(), MessageToReceiveDto.class);
 
-        String username = (String) session.getAttributes().get("username");
-        String friend = (String) session.getAttributes().get("friend");
+        String username = (String) session.getAttributes().get("owner");
+        String friend = (String) session.getAttributes().get("dedicatedTo");
 
         MessageToSendDto messageToSend = MessageToSendDto.of(
                 messageService.saveMessage(username, friend, receivedMessage.text())
@@ -56,11 +61,31 @@ public class CustomHandler extends TextWebSocketHandler{
         List<WebSocketSession> sessions = sessionManager.getSessions(owner);
         if (sessions == null || sessions.isEmpty()) return;
         sessions.forEach(s -> {
+            if (s == null || !s.isOpen()) {
+                sessions.remove(s);
+                return;
+            }
             try {
-                String receiver = (String) s.getAttributes().get("friend");
-                if (! receiver.equals(dedicatedTo) ) return;
+                String receiver = (String) s.getAttributes().get("dedicatedTo");
+                if (receiver.equals(dedicatedTo)) {
+                    s.sendMessage(new TextMessage(Util.toJsonString(messageToSend)));
+                }
+                if (receiver.equals("MESSAGES")) {
+                    boolean isSenderI = messageToSend.sender().equals(owner);
+                    User user = userService.getUserByUsername(dedicatedTo);
+                    s.sendMessage(new TextMessage(Util.toJsonString(
+                            new MessageProfileDto(
+                                    user.getUsername(),
+                                    isSenderI,
+                                    user.getFullName(),
+                                    user.getPictureBase64(),
+                                    messageToSend.text(),
+                                    messageToSend.timestamp(),
+                                    messageToSend.seen() ? 0 : 1
+                            )
+                    )));
+                }
 
-                s.sendMessage(new TextMessage(Util.toJsonString(messageToSend)));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -69,7 +94,7 @@ public class CustomHandler extends TextWebSocketHandler{
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        String username = (String) session.getAttributes().get("username");
+        String username = (String) session.getAttributes().get("owner");
         if (username != null) {
             sessionManager.removeSession(username,session);
         }

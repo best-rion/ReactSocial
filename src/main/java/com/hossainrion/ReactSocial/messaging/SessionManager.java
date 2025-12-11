@@ -3,6 +3,8 @@ package com.hossainrion.ReactSocial.messaging;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +15,7 @@ public class SessionManager {
 
     public void addSession(String username, WebSocketSession session) {
         if (!sessions.containsKey(username)) {
-            List<WebSocketSession> sessionList = new ArrayList<>();
+            List<WebSocketSession> sessionList = Collections.synchronizedList(new ArrayList<>());
             sessionList.add(session);
             sessions.put(username, sessionList);
         } else {

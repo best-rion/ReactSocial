@@ -6,6 +6,7 @@ import com.hossainrion.ReactSocial.messaging.dto.MessageToSendDto;
 import com.hossainrion.ReactSocial.messaging.entity.Message;
 import com.hossainrion.ReactSocial.messaging.repository.MessageRepository;
 import com.hossainrion.ReactSocial.service.UserService;
+import com.hossainrion.ReactSocial.utils.Util;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,12 +70,27 @@ public class MessageServiceImpl implements MessageService {
         List<WebSocketSession> sessions = sessionManager.getSessions(friend.getUsername());
         if (sessions != null && !sessions.isEmpty()) {
             sessions.forEach(s -> {
-
-                String receiver = (String) s.getAttributes().get("friend");
-                if (! receiver.equals(thisUser.getUsername())) return;
-
+                if (s == null || !s.isOpen()) {
+                    sessions.remove(s);
+                    return;
+                }
                 try {
-                    s.sendMessage(new TextMessage("seen"));
+                    String dedicatedTo = (String) s.getAttributes().get("dedicatedTo");
+                    if (dedicatedTo.equals(thisUser.getUsername())) {
+                        s.sendMessage(new TextMessage("seen"));
+                    }
+                    if (dedicatedTo.equals("MESSAGES")) {
+                        s.sendMessage(new TextMessage(Util.toJsonString(new MessageProfileDto(
+                                thisUser.getUsername(),
+                                false,
+                                null,
+                                null,
+                                null,
+                                null,
+                                0
+
+                        ))));
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -98,11 +114,11 @@ public class MessageServiceImpl implements MessageService {
         return ResponseEntity.ok(
                 messageRepository.findAllForMessgePage(user.getId()).stream().map(
                 message -> {
-                    Boolean isSender = user.getUsername().equals(message.getReceiver().getUsername());
-                    User profile = isSender ? message.getSender() : message.getReceiver();
+                    Boolean isSenderI = message.getSender().getUsername().equals(user.getUsername());
+                    User profile = isSenderI ? message.getReceiver() : message.getSender();
                     return new MessageProfileDto(
                             profile.getUsername(),
-                            isSender,
+                            isSenderI,
                             profile.getFullName(),
                             profile.getPictureBase64(),
                             message.getContent(),
