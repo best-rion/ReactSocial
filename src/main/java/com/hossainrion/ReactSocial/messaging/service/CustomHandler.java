@@ -31,10 +31,7 @@ public class CustomHandler extends TextWebSocketHandler{
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        String username = (String) session.getAttributes().get("owner");
-        if (username != null) {
-            sessionManager.addSession(username, session);
-        }
+        sessionManager.addSession(session);
     }
 
     @Override
@@ -57,12 +54,12 @@ public class CustomHandler extends TextWebSocketHandler{
     }
 
     private void sendMessage(String owner, String dedicatedTo, MessageToSendDto messageToSend) {
-        if (owner == null) return;
+        if (owner == null || dedicatedTo == null) return;
         List<WebSocketSession> sessions = sessionManager.getSessions(owner);
         if (sessions == null || sessions.isEmpty()) return;
         sessions.forEach(s -> {
             if (s == null || !s.isOpen()) {
-                sessions.remove(s);
+                sessionManager.removeSession(s);
                 return;
             }
             try {
@@ -94,9 +91,6 @@ public class CustomHandler extends TextWebSocketHandler{
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        String username = (String) session.getAttributes().get("owner");
-        if (username != null) {
-            sessionManager.removeSession(username,session);
-        }
+        sessionManager.removeSession(session);
     }
 }

@@ -98,6 +98,36 @@ public class MessageServiceImpl implements MessageService {
         } else {
             System.out.println("No sessions found for " + friend.getUsername());
         }
+
+
+        List<WebSocketSession> sessionsMy = sessionManager.getSessions(thisUser.getUsername());
+        if (sessionsMy != null && !sessionsMy.isEmpty()) {
+            sessionsMy.forEach(s -> {
+                if (s == null || !s.isOpen()) {
+                    sessionManager.removeSession(s);
+                    return;
+                }
+                try {
+                    String dedicatedTo = (String) s.getAttributes().get("dedicatedTo");
+                    if (dedicatedTo.equals("MESSAGES")) {
+                        s.sendMessage(new TextMessage(Util.toJsonString(new MessageProfileDto(
+                                friend.getUsername(),
+                                true,
+                                null,
+                                null,
+                                null,
+                                null,
+                                0
+
+                        ))));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } else {
+            System.out.println("No sessions found for " + friend.getUsername());
+        }
         return ResponseEntity.ok(true);
     }
 
