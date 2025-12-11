@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.messaging.service;
 
-import com.hossainrion.ReactSocial.JwtUtil;
+import com.hossainrion.ReactSocial.utils.JwtUtil;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;

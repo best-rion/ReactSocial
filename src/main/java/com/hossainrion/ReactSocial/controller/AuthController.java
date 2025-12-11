@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.controller;
 
-import com.hossainrion.ReactSocial.JwtUtil;
+import com.hossainrion.ReactSocial.utils.JwtUtil;
 import com.hossainrion.ReactSocial.dto.JwtResponse;
 import com.hossainrion.ReactSocial.dto.forUser.LoginDto;
 import com.hossainrion.ReactSocial.service.UserService;

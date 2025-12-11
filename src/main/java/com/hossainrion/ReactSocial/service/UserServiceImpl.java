@@ -1,6 +1,6 @@
 package com.hossainrion.ReactSocial.service;
 
-import com.hossainrion.ReactSocial.JwtUtil;
+import com.hossainrion.ReactSocial.utils.JwtUtil;
 import com.hossainrion.ReactSocial.dto.forUser.*;
 import com.hossainrion.ReactSocial.utils.Util;
 import com.hossainrion.ReactSocial.dto.*;
@@ -19,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 

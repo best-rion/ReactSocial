@@ -1,4 +1,4 @@
-package com.hossainrion.ReactSocial;
+package com.hossainrion.ReactSocial.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

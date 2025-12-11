@@ -1,6 +1,5 @@
 package com.hossainrion.ReactSocial.controller;
 
-import com.hossainrion.ReactSocial.JwtUtil;
 import com.hossainrion.ReactSocial.dto.IdDto;
 import com.hossainrion.ReactSocial.dto.forUser.FriendStatus;
 import com.hossainrion.ReactSocial.dto.forUser.UserResponseDto;
