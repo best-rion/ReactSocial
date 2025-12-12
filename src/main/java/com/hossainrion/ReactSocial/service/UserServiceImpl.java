@@ -105,7 +105,7 @@ public class UserServiceImpl implements UserService {
         final String refreshToken = JwtUtil.generateRefreshToken(user.getUsername());
         ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
-                .secure(false)       // must be false for HTTP localhost
+                .secure(true)       // must be false for HTTP localhost
                 .sameSite("Lax")     // "None" requires secure=true
                 .path("/")
                 .maxAge(JwtUtil.REFRESH_TOKEN_EXPIRATION_TIME_IN_SECONDS)

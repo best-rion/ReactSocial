@@ -12,11 +12,11 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-@Component
+
 public  class JwtUtil {
     private static final SecretKey secretKey = Keys.hmacShaKeyFor("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad".getBytes(StandardCharsets.UTF_8));
-    public static final long JWT_TOKEN_EXPIRATION_TIME_IN_SECONDS = 5 * 60 ;
-    public static final long REFRESH_TOKEN_EXPIRATION_TIME_IN_SECONDS = 60 * 60;
+    public static final long JWT_TOKEN_EXPIRATION_TIME_IN_SECONDS = 60 * 60 * 30 ;
+    public static final long REFRESH_TOKEN_EXPIRATION_TIME_IN_SECONDS = 60 * 60 * 24 * 7;
 
 
     public static String generateJwtToken(String username) {

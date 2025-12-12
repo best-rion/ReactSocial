@@ -35,7 +35,7 @@ public class AuthController {
         final String newRefreshToken = JwtUtil.generateRefreshToken(username);
         ResponseCookie cookie = ResponseCookie.from("refresh_token", newRefreshToken)
                 .httpOnly(true)
-                .secure(false)       // must be false for HTTP localhost
+                .secure(true)       // must be false for HTTP localhost
                 .sameSite("Lax")     // "None" requires secure=true
                 .path("/")
                 .maxAge(JwtUtil.REFRESH_TOKEN_EXPIRATION_TIME_IN_SECONDS)
