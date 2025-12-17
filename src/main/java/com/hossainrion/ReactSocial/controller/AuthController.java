@@ -21,6 +21,24 @@ public class AuthController {
         return userService.handleAuthentication(loginDto);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+
+        // Clear cookie
+        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("Logged out successfully");
+    }
+
+
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@CookieValue(value = "refresh_token", required = false) String refreshToken) {
 
